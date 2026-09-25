@@ -1,0 +1,19 @@
+# tested with mujoco 3.13.0, lerobot 0.6.1 on Python 3.12
+mujoco>=3.1
+numpy
+imageio
+imageio-ffmpeg
+opencv-python-headless
+matplotlib
+pandas
+scikit-learn
+pytest
+# later, for the AI + API roles
+openai>=1.0
+fastapi
+uvicorn[standard]
+pydantic>=2
+# for the dataset writer and for training (large download, includes torch) - install on the machine that needs them:
+#   pip install "lerobot[dataset]"      dataset writer / merge / viewer
+#   pip install "lerobot[training]"     GR00T / SmolVLA training
+#   pip install "lerobot[smolvla]"      SmolVLA

@@ -1,0 +1,5 @@
+{"type":"observation","episode_id":"S3-seed7-ours","t":12.4,"detections":[{"label":"cup_red","xy":[-0.28,0.10],"px":[168,183,202,229],"score":0.98}],"occluders":[{"id":"screen","xy":[0.0,-0.05]}],"events":[{"kind":"zone_disturbed","zone":"behind_screen","t":11.9}]}
+{"type":"belief","episode_id":"S3-seed7-ours","t":12.4,"objects":[{"name":"bottle_blue","xy":[0.0,0.12],"conf":0.78,"last_seen_t":1.0,"hidden_by":"screen","status":"stale"},{"name":"cup_red","xy":[-0.28,0.10],"conf":1.0,"last_seen_t":12.4,"hidden_by":null,"status":"visible"}]}
+{"type":"decision","episode_id":"S3-seed7-ours","t":12.5,"engine":"llm","action":"relook","target":"bottle_blue","command":"look over the screen","why":"The bottle was hidden for 11 s and that area was disturbed.","latency_ms":840}
+{"type":"action_result","episode_id":"S3-seed7-ours","t":19.8,"skill":"peek","ok":true,"duration_s":6.9}
+{"type":"episode_end","episode_id":"S3-seed7-ours","success":true,"total_time_s":31.2,"relooks":1,"llm_calls":2,"ground_truth_xy":[0.18,0.10]}
