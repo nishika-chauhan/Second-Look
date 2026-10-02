@@ -7,9 +7,14 @@
 import argparse
 import os
 import shutil
+import sys
 
-from lerobot.datasets import LeRobotDataset
-from lerobot.datasets.dataset_tools import merge_datasets
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+try:
+    from dataset_backend import LeRobotDataset, merge_datasets
+except ImportError:
+    from lerobot.datasets import LeRobotDataset
+    from lerobot.datasets.dataset_tools import merge_datasets
 
 ap = argparse.ArgumentParser()
 ap.add_argument("--shards", nargs="+", required=True)
