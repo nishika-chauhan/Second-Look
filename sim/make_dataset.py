@@ -15,11 +15,15 @@ import shutil
 import sys
 import time
 
-os.environ.setdefault("MUJOCO_GL", "osmesa")     # headless Linux. On Windows/macOS delete this line.
+if sys.platform.startswith("linux"):
+    os.environ.setdefault("MUJOCO_GL", "osmesa")     # headless Linux
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import numpy as np                               # noqa: E402
-from lerobot.datasets import LeRobotDataset      # noqa: E402
+try:
+    from dataset_backend import LeRobotDataset   # noqa: E402
+except ImportError:
+    from lerobot.datasets import LeRobotDataset  # noqa: E402
 
 from expert import TASK_TEXT, run_expert         # noqa: E402
 from world import OBJECTS, SecondLookEnv         # noqa: E402
@@ -53,7 +57,8 @@ def main():
         tries += 1
         rng = np.random.default_rng(10_000 + seed)
         target = OBJECTS[seed % 3]
-        start = str(rng.choice(["home", "home", "look_L", "look_R"]))
+        # Balanced across 3 start types: home, look_L, look_R
+        start = ["home", "look_L", "look_R"][(seed // 3) % 3]
         env.reset(seed=seed, target=target, start=start)
         ok, frames = run_expert(env, target, rng)
         if not ok:
@@ -63,7 +68,7 @@ def main():
                           "observation.images.wrist": obs["wrist"],
                           "observation.state": obs["state"], "action": action,
                           "task": TASK_TEXT[target]})
-        ds.save_episode()
+        ds.save_episode(seed=seed, target=target, start=start)
         kept += 1
         frames_total += len(frames)
     ds.finalize()

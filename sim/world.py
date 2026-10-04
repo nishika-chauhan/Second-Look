@@ -49,15 +49,26 @@ def _slab_hit(p0, p1, bmin, bmax):
 
 
 class SecondLookEnv:
-    def __init__(self, render=True, img=224):
+    def __init__(self, render=True, img=224, randomize=True, third_occluder=False):
         self.m = mujoco.MjModel.from_xml_path(os.path.join(HERE, "scene_v2.xml"))
         self.d = mujoco.MjData(self.m)
         self.render, self.img = render, img
+        self.randomize = randomize
+        self.third_occluder = third_occluder
         self.r = mujoco.Renderer(self.m, height=img, width=img) if render else None
         self.opt_wrist = mujoco.MjvOption()             # the wrist camera does not draw the gantry frame
         self.opt_wrist.geomgroup[1] = 0
         gid = lambda n: mujoco.mj_name2id(self.m, mujoco.mjtObj.mjOBJ_GEOM, n)
+        self.screen_mid_gid = gid("screen_mid_g")
         self.screen_geoms = {"L": gid("screen_left_g"), "R": gid("screen_right_g")}
+        if self.third_occluder:
+            self.screen_geoms["M"] = self.screen_mid_gid
+        self.front_cam = mujoco.mj_name2id(self.m, mujoco.mjtObj.mjOBJ_CAMERA, "front")
+        self.base_cam_pos = self.m.cam_pos[self.front_cam].copy()
+        self.cam_pos = self.base_cam_pos.copy()
+        self.base_light_pos = self.m.light_pos[0].copy()
+        self.base_light_dir = self.m.light_dir[0].copy()
+        self.base_light_diffuse = self.m.light_diffuse[0].copy()
         self.grip_site = mujoco.mj_name2id(self.m, mujoco.mjtObj.mjOBJ_SITE, "grip")
         self.bid = {n: mujoco.mj_name2id(self.m, mujoco.mjtObj.mjOBJ_BODY, n) for n in OBJECTS}
         self.jadr = {n: self.m.jnt_qposadr[mujoco.mj_name2id(self.m, mujoco.mjtObj.mjOBJ_JOINT, n + "_j")]
@@ -65,6 +76,9 @@ class SecondLookEnv:
         self.gid = {n: gid(n + "_g") for n in OBJECTS}
         self.jdof = {n: self.m.jnt_dofadr[mujoco.mj_name2id(self.m, mujoco.mjtObj.mjOBJ_JOINT, n + "_j")]
                      for n in OBJECTS}
+        self.base_geom_size = {n: self.m.geom_size[self.gid[n]].copy() for n in OBJECTS}
+        self.base_geom_rgba = {n: self.m.geom_rgba[self.gid[n]].copy() for n in OBJECTS}
+        self.rest_z = {n: REST_Z[n] for n in OBJECTS}
         self.slide = {k: self.m.jnt_qposadr[mujoco.mj_name2id(self.m, mujoco.mjtObj.mjOBJ_JOINT, k)]
                       for k in ("gx", "gy", "gz")}
         self.attached, self.grip, self.t, self.target = None, 1.0, 0, None
@@ -82,10 +96,10 @@ class SecondLookEnv:
         return np.array([sx * 1.14, 0.14])
 
     def front_visible_pos(self, p):
-        """True if the front camera has a clear line of sight to point p (both screens are checked)."""
+        """True if the front camera has a clear line of sight to point p (all active screens are checked)."""
         for g in self.screen_geoms.values():
             c, s = self.m.geom_pos[g], self.m.geom_size[g]
-            if _slab_hit(CAM_POS, np.asarray(p, float), c - s, c + s):
+            if _slab_hit(self.cam_pos, np.asarray(p, float), c - s, c + s):
                 return False
         return True
 
@@ -105,25 +119,27 @@ class SecondLookEnv:
 
     # ---------------------------------------------------------------- reset
     def _sample_xy(self, rng, hidden, region, others):
-        for _ in range(300):
-            if hidden:
-                k = region or str(rng.choice(["L", "R"]))
-                x, y = self.hide_center(k)[0] + rng.uniform(-0.06, 0.06), rng.uniform(0.09, 0.19)
-            elif rng.random() < 0.6:
-                x, y = rng.uniform(-0.40, 0.40), rng.uniform(-0.15, -0.06)
-            else:
-                x, y = rng.uniform(-0.07, 0.07), rng.uniform(0.06, 0.20)
-            p = np.array([x, y])
-            if any(np.linalg.norm(p - q) < 0.08 for q in others):
-                continue
-            if self.front_visible_pos([x, y, 0.04]) == hidden:
-                continue
-            return p
+        # Try standard clearance (0.08m) first, then fallback to relaxed (0.055m) if congested
+        for clearance in (0.08, 0.055):
+            for _ in range(300):
+                if hidden:
+                    k = region or str(rng.choice(list(self.screen_geoms.keys())))
+                    x, y = self.hide_center(k)[0] + rng.uniform(-0.06, 0.06), rng.uniform(0.09, 0.19)
+                elif rng.random() < 0.6:
+                    x, y = rng.uniform(-0.40, 0.40), rng.uniform(-0.15, -0.06)
+                else:
+                    x, y = rng.uniform(-0.07, 0.07), rng.uniform(0.06, 0.20)
+                p = np.array([x, y])
+                if any(np.linalg.norm(p - q) < clearance for q in others):
+                    continue
+                if self.front_visible_pos([x, y, 0.04]) == hidden:
+                    continue
+                return p
         raise RuntimeError("could not place an object")
 
     def _put(self, name, xy):
         a = self.jadr[name]
-        self.d.qpos[a:a + 3] = [xy[0], xy[1], REST_Z[name]]
+        self.d.qpos[a:a + 3] = [xy[0], xy[1], self.rest_z[name]]
         self.d.qpos[a + 3:a + 7] = [1, 0, 0, 0]
 
     def set_gantry(self, xyz, g=1.0):
@@ -132,29 +148,86 @@ class SecondLookEnv:
         self.d.ctrl[:] = [xyz[0], xyz[1], xyz[2] - Z_HOME_JOINT]
         self.grip = g
 
-    def reset(self, seed=0, target="cup_red", start="home"):
-        """start: 'home' (target visible from the front) | 'look_L' | 'look_R' (target hidden behind that
+    def reset(self, seed=0, target="cup_red", start="home", randomize=None, third_occluder=None):
+        """start: 'home' (target visible from the front) | 'look_L' | 'look_R' | 'look_M' (target hidden behind that
         screen, robot already hovering above it - like after a 'look')."""
+        if randomize is None:
+            randomize = self.randomize
+        if third_occluder is None:
+            third_occluder = self.third_occluder
+        self.third_occluder = third_occluder
         rng = np.random.default_rng(seed)
         mujoco.mj_resetData(self.m, self.d)
         self.attached, self.target, self.t = None, target, 0
-        for g in self.screen_geoms.values():
-            self.m.geom_contype[g] = 1
-        self.m.geom_pos[self.screen_geoms["L"]][0] = -0.22 + rng.uniform(-0.03, 0.03)
-        self.m.geom_pos[self.screen_geoms["R"]][0] = 0.22 + rng.uniform(-0.03, 0.03)
+
+        # Occluder configuration
+        if third_occluder:
+            self.screen_geoms["M"] = self.screen_mid_gid
+            self.m.geom_contype[self.screen_mid_gid] = 1
+            self.m.geom_conaffinity[self.screen_mid_gid] = 1
+            mid_x = rng.uniform(-0.02, 0.02) if randomize else 0.0
+            self.m.geom_pos[self.screen_mid_gid][:] = [mid_x, 0.0, 0.09]
+        else:
+            self.screen_geoms.pop("M", None)
+            self.m.geom_contype[self.screen_mid_gid] = 0
+            self.m.geom_conaffinity[self.screen_mid_gid] = 0
+            self.m.geom_pos[self.screen_mid_gid][:] = [0.0, -5.0, 0.09]
+
+        for g in ("L", "R"):
+            gid = self.screen_geoms[g]
+            self.m.geom_contype[gid] = 1
+            self.m.geom_conaffinity[gid] = 1
+
+        if randomize:
+            # 1. Screen positions jitter
+            self.m.geom_pos[self.screen_geoms["L"]][0] = -0.22 + rng.uniform(-0.03, 0.03)
+            self.m.geom_pos[self.screen_geoms["R"]][0] = 0.22 + rng.uniform(-0.03, 0.03)
+
+            # 2. Lighting randomisation (directional light pos, dir, diffuse)
+            self.m.light_pos[0] = self.base_light_pos + rng.uniform([-0.15, -0.15, -0.10], [0.15, 0.15, 0.10])
+            self.m.light_dir[0] = self.base_light_dir + rng.uniform(-0.08, 0.08, 3)
+            self.m.light_diffuse[0] = np.clip(self.base_light_diffuse + rng.uniform(-0.10, 0.10, 3), 0.25, 0.75)
+
+            # 3. Front camera pose jitter (wrist camera remains fixed to robot head)
+            cam_jit = rng.uniform([-0.015, -0.015, -0.010], [0.015, 0.015, 0.010])
+            self.m.cam_pos[self.front_cam] = self.base_cam_pos + cam_jit
+            self.cam_pos = self.m.cam_pos[self.front_cam].copy()
+
+            # 4. Small object size & colour jitter per seed
+            for n in OBJECTS:
+                gid = self.gid[n]
+                size_scale = rng.uniform(0.95, 1.05)
+                self.m.geom_size[gid] = self.base_geom_size[n] * size_scale
+                self.rest_z[n] = REST_Z[n] * size_scale
+                rgb_jit = rng.uniform(-0.06, 0.06, 3)
+                self.m.geom_rgba[gid][:3] = np.clip(self.base_geom_rgba[n][:3] + rgb_jit, 0.05, 1.0)
+        else:
+            self.m.geom_pos[self.screen_geoms["L"]][0] = -0.22
+            self.m.geom_pos[self.screen_geoms["R"]][0] = 0.22
+            self.m.light_pos[0] = self.base_light_pos.copy()
+            self.m.light_dir[0] = self.base_light_dir.copy()
+            self.m.light_diffuse[0] = self.base_light_diffuse.copy()
+            self.m.cam_pos[self.front_cam] = self.base_cam_pos.copy()
+            self.cam_pos = self.base_cam_pos.copy()
+            for n in OBJECTS:
+                self.m.geom_size[self.gid[n]] = self.base_geom_size[n].copy()
+                self.m.geom_rgba[self.gid[n]] = self.base_geom_rgba[n].copy()
+                self.rest_z[n] = REST_Z[n]
+
         for n in OBJECTS:                                   # make sure collisions are on again
             self.m.geom_contype[self.gid[n]] = 1; self.m.geom_conaffinity[self.gid[n]] = 1
         placed = []
         order = [target] + [n for n in OBJECTS if n != target]
         for n in order:
             if n == target:
-                hidden, region = start.startswith("look"), (start[-1] if start.startswith("look") else None)
+                hidden = start.startswith("look")
+                region = (start.split("_")[1] if start.startswith("look_") else None)
             else:
                 hidden, region = bool(rng.random() < 0.4), None
             xy = self._sample_xy(rng, hidden, region, placed)
             placed.append(xy); self._put(n, xy)
         if start.startswith("look"):
-            c = self.hide_center(start[-1]); self.set_gantry([c[0], c[1], Z_SAFE])
+            c = self.hide_center(start.split("_")[1]); self.set_gantry([c[0], c[1], Z_SAFE])
         else:
             self.set_gantry(HOME)
         mujoco.mj_forward(self.m, self.d)

@@ -2,35 +2,35 @@
   <option timestep="0.002" gravity="0 0 -9.81" integrator="implicitfast"/>
   <visual>
     <global offwidth="640" offheight="480"/>
-    <headlight ambient="0.42 0.42 0.44" diffuse="0.48 0.48 0.48" specular="0.12 0.12 0.12"/>
+    <headlight ambient="0.45 0.45 0.45" diffuse="0.5 0.5 0.5" specular="0 0 0"/>
   </visual>
 
   <asset>
-    <texture name="grid" type="2d" builtin="checker" rgb1="0.88 0.88 0.90"
-             rgb2="0.76 0.77 0.80" width="256" height="256"/>
-    <material name="tablemat" texture="grid" texrepeat="6 4" specular="0.15" shininess="0.1"/>
+    <texture name="grid" type="2d" builtin="checker" rgb1="0.85 0.85 0.85"
+             rgb2="0.75 0.75 0.75" width="256" height="256"/>
+    <material name="tablemat" texture="grid" texrepeat="6 4"/>
   </asset>
 
   <worldbody>
     <light directional="true" pos="0 -0.5 1.5" dir="0 0.3 -1"
-           diffuse="0.55 0.55 0.55" specular="0.18 0.18 0.18"/>
-    <geom name="floor" type="plane" size="2 2 0.1" pos="0 0 -0.4" rgba="0.18 0.19 0.22 1"/>
+           diffuse="0.5 0.5 0.5" specular="0 0 0"/>
+    <geom name="floor" type="plane" size="2 2 0.1" pos="0 0 -0.4" rgba="0.2 0.2 0.25 1"/>
     <geom name="table" type="box" size="0.5 0.35 0.02" pos="0 0 -0.02" material="tablemat"/>
     <!-- the tray is only painted on the table (no collisions) -->
     <geom name="tray_g" type="box" size="0.07 0.05 0.003" pos="0 -0.22 0.003"
-          rgba="0.95 0.82 0.18 0.9" contype="0" conaffinity="0"/>
+          rgba="0.95 0.85 0.2 1" contype="0" conaffinity="0"/>
 
     <camera name="front" mode="targetbody" target="cam_target" pos="0 -0.85 0.55" fovy="50"/>
     <body name="cam_target" pos="0 0 0.02"/>
 
     <!-- two screens hide whatever is behind them (seen from the front camera) -->
     <geom name="screen_left_g" type="box" size="0.09 0.01 0.09" pos="-0.22 0 0.09"
-          rgba="0.52 0.54 0.58 1"/>
+          rgba="0.55 0.55 0.6 1"/>
     <geom name="screen_right_g" type="box" size="0.09 0.01 0.09" pos="0.22 0 0.09"
-          rgba="0.52 0.54 0.58 1"/>
+          rgba="0.55 0.55 0.6 1"/>
     <!-- optional third occluder screen (controlled via third_occluder flag in world.py; default off) -->
     <geom name="screen_mid_g" type="box" size="0.08 0.01 0.09" pos="0 -5.0 0.09"
-          rgba="0.52 0.54 0.58 1" contype="0" conaffinity="0"/>
+          rgba="0.55 0.55 0.6 1" contype="0" conaffinity="0"/>
 
     <!-- objects (free bodies) -->
     <body name="cup_red" pos="-0.28 -0.10 0.04">
@@ -49,25 +49,25 @@
 
     <!-- gantry robot: y-beam, x-carriage, z-head. Decorative parts do not collide. -->
     <geom name="rail_left" type="box" size="0.01 0.36 0.01" pos="-0.52 0 0.45"
-          rgba="0.22 0.22 0.25 1" contype="0" conaffinity="0" group="1"/>
+          rgba="0.3 0.3 0.3 1" contype="0" conaffinity="0" group="1"/>
     <geom name="rail_right" type="box" size="0.01 0.36 0.01" pos="0.52 0 0.45"
-          rgba="0.22 0.22 0.25 1" contype="0" conaffinity="0" group="1"/>
+          rgba="0.3 0.3 0.3 1" contype="0" conaffinity="0" group="1"/>
     <body name="beam" pos="0 0 0.45">
       <joint name="gy" type="slide" axis="0 1 0" range="-0.3 0.3" damping="80"/>
-      <geom type="box" size="0.52 0.012 0.012" rgba="0.92 0.58 0.10 1" contype="0" conaffinity="0"
-            group="1"/>
+      <geom type="box" size="0.52 0.012 0.012" rgba="0.9 0.6 0.1 1" contype="0" conaffinity="0"
+                group="1"/>
       <body name="carriage" pos="0 0 0">
         <joint name="gx" type="slide" axis="1 0 0" range="-0.45 0.45" damping="80"/>
-        <geom type="box" size="0.03 0.03 0.02" rgba="0.92 0.58 0.10 1" contype="0" conaffinity="0"
+        <geom type="box" size="0.03 0.03 0.02" rgba="0.9 0.6 0.1 1" contype="0" conaffinity="0"
               group="1"/>
         <body name="head" pos="0 0 -0.05">
           <joint name="gz" type="slide" axis="0 0 1" range="-0.42 0.30" damping="80"/>
-          <geom type="cylinder" size="0.006 0.15" pos="0 0 0.02" rgba="0.75 0.75 0.78 1"
+          <geom type="cylinder" size="0.006 0.15" pos="0 0 0.02" rgba="0.6 0.6 0.6 1"
                 contype="0" conaffinity="0" group="1"/>
           <site name="grip" pos="0 0 -0.26" size="0.01" rgba="1 1 0 1" group="4"/>
-          <geom type="box" size="0.004 0.012 0.02" pos="-0.022 0 -0.26" rgba="0.18 0.18 0.20 1"
+          <geom type="box" size="0.004 0.012 0.02" pos="-0.022 0 -0.26" rgba="0.2 0.2 0.2 1"
                 contype="0" conaffinity="0"/>
-          <geom type="box" size="0.004 0.012 0.02" pos="0.022 0 -0.26" rgba="0.18 0.18 0.20 1"
+          <geom type="box" size="0.004 0.012 0.02" pos="0.022 0 -0.26" rgba="0.2 0.2 0.2 1"
                 contype="0" conaffinity="0"/>
           <!-- wrist camera: looks straight down from above the fingers -->
           <camera name="wrist" pos="0 0 -0.12" xyaxes="1 0 0 0 1 0" fovy="60"/>
