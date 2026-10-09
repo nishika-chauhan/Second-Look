@@ -101,23 +101,32 @@ def check(path: str, n_episodes: int = 3) -> bool:
     # 5. Schema checks
     # ------------------------------------------------------------------
     cols = list(df.columns)
-    camera_front = any("front" in c for c in cols)
-    camera_wrist = any("wrist" in c for c in cols)
-    has_action    = any("action" in c for c in cols)
-    has_state     = any("state" in c or "observation.state" in c for c in cols)
-    has_episode   = "episode_index" in cols or "episode_id" in cols
+    # LeRobot v2 stores images as video files on disk — NOT as parquet columns.
+    # The parquet only has: index, episode_index, frame_index, timestamp,
+    # observation.state, action, task_index, task.
+    # Camera presence is verified by checking the videos/ directory instead.
+    has_action  = any("action" in c for c in cols)
+    has_state   = any("state"  in c for c in cols)
+    has_episode = "episode_index" in cols or "episode_id" in cols
+    has_timestamp = "timestamp" in cols
 
-    log("✓" if camera_front else "✗", f"front camera column: {'found' if camera_front else 'MISSING'}")
-    log("✓" if camera_wrist else "✗", f"wrist camera column: {'found' if camera_wrist else 'MISSING'}")
-    log("✓" if has_action   else "✗", f"action column:       {'found' if has_action else 'MISSING'}")
-    log("✓" if has_state    else "✗", f"state column:        {'found' if has_state else 'MISSING'}")
-    log("✓" if has_episode  else "✗", f"episode_index:       {'found' if has_episode else 'MISSING'}")
+    log("✓" if has_action    else "✗", f"action column:    {'found' if has_action else 'MISSING'}")
+    log("✓" if has_state     else "✗", f"state column:     {'found' if has_state else 'MISSING'}")
+    log("✓" if has_episode   else "✗", f"episode_index:    {'found' if has_episode else 'MISSING'}")
+    log("✓" if has_timestamp else "✗", f"timestamp column: {'found' if has_timestamp else 'MISSING'}")
+    log("✓", f"columns: {cols}")
 
-    if not (camera_front and camera_wrist):
-        log("!", "Camera columns found in schema:")
-        for c in cols:
-            if "image" in c or "camera" in c or "front" in c or "wrist" in c:
-                print(f"       {c}")
+    # Camera check: look for video subdirectories
+    video_dir = root / "videos"
+    cam_front_dir = video_dir / "observation.images.front"
+    cam_wrist_dir = video_dir / "observation.images.wrist"
+    has_front_vid = cam_front_dir.is_dir()
+    has_wrist_vid = cam_wrist_dir.is_dir()
+    log("✓" if has_front_vid else "✗",
+        f"front camera videos: {'found at videos/observation.images.front/' if has_front_vid else 'MISSING'}")
+    log("✓" if has_wrist_vid else "✗",
+        f"wrist camera videos: {'found at videos/observation.images.wrist/' if has_wrist_vid else 'MISSING'}")
+    if not has_front_vid or not has_wrist_vid:
         ok = False
 
     # ------------------------------------------------------------------
@@ -160,20 +169,32 @@ def check(path: str, n_episodes: int = 3) -> bool:
         wrist_vids = sorted(root.glob("**/*wrist*.mp4"))
 
     if wrist_vids:
-        vid_path = wrist_vids[0]
-        cap = cv2.VideoCapture(str(vid_path))
-        ret, frame = cap.read()
-        cap.release()
-        if ret:
-            h, w = frame.shape[:2]
-            log("✓", f"Decoded wrist frame from {vid_path.name}  ({w}×{h})")
-            if w != 224 or h != 224:
-                log("!", f"Expected 224×224, got {w}×{h} — update WRIST_IMG_W/H in perception.py")
+        # wrist_vids may be directories (LeRobot v2 stores one mp4 per episode
+        # inside videos/observation.images.wrist/).  Find actual .mp4 files.
+        mp4_files = []
+        for p in wrist_vids:
+            if p.is_dir():
+                mp4_files.extend(sorted(p.glob("*.mp4")))
+            elif p.suffix.lower() == ".mp4":
+                mp4_files.append(p)
+
+        if mp4_files:
+            vid_path = mp4_files[0]
+            cap = cv2.VideoCapture(str(vid_path))
+            ret, frame = cap.read()
+            cap.release()
+            if ret:
+                h, w = frame.shape[:2]
+                log("✓", f"Decoded wrist frame from {vid_path.name}  ({w}×{h})")
+                if w != 224 or h != 224:
+                    log("!", f"Expected 224×224, got {w}×{h} — update WRIST_IMG_W/H in perception.py")
+            else:
+                log("✗", f"Could not decode a frame from {vid_path}")
+                ok = False
         else:
-            log("✗", f"Could not decode a frame from {vid_path}")
-            ok = False
+            log("!", f"Video directory found but no .mp4 files inside — check {wrist_vids[0]}")
     else:
-        log("!", "No wrist video files found — skipping frame decode check")
+        log("!", "No wrist video directory found — skipping frame decode check")
         log(" ", "(Videos may be embedded in parquet as byte arrays — that's fine)")
 
     # ------------------------------------------------------------------

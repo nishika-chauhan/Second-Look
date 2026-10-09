@@ -1,22 +1,36 @@
-# tested with mujoco 3.13.0, lerobot 0.6.1 on Python 3.12
+# Tested on Python 3.12 (Windows).
+# Install order matters: torch first, from the CPU index, then this file.
+#
+#   py -3.12 -m venv .venv
+#   .venv\Scripts\Activate.ps1
+#   python -m pip install --upgrade pip
+#   pip install torch==2.11.0 torchvision==0.26.0 --index-url https://download.pytorch.org/whl/cpu
+#   pip install -r requirements.txt
+
+# --- simulation and data ---
 mujoco>=3.1
 numpy
+pandas
+matplotlib
+scikit-learn
 imageio
 imageio-ffmpeg
-opencv-python-headless
-matplotlib
-pandas
-scikit-learn
+opencv-python
+fastparquet
+
+# --- LeRobot dataset writer / merge / viewer ---
+lerobot==0.6.1
+
+# --- testing ---
 pytest
-# later, for the AI + API roles
+
+# --- AI + API (later) ---
 openai>=1.0
-fastapi
-uvicorn[standard]
 pydantic>=2
 fastapi
 uvicorn[standard]
 websockets
-# for the dataset writer and for training (large download, includes torch) - install on the machine that needs them:
-#   pip install "lerobot[dataset]"      dataset writer / merge / viewer
-#   pip install "lerobot[training]"     GR00T / SmolVLA training
-#   pip install "lerobot[smolvla]"      SmolVLA
+
+# --- training (install only on the machine that needs it) ---
+#   pip install "lerobot[training]"   GR00T / SmolVLA training
+#   pip install "lerobot[smolvla]"    SmolVLA
