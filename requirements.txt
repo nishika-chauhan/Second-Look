@@ -6,6 +6,8 @@ imageio-ffmpeg
 opencv-python-headless
 matplotlib
 pandas
+fastparquet
+pyyaml
 scikit-learn
 pytest
 # later, for the AI + API roles
