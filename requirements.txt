@@ -15,6 +15,7 @@ matplotlib
 scikit-learn
 imageio
 imageio-ffmpeg
+<<<<<<< HEAD
 opencv-python
 fastparquet
 
@@ -22,6 +23,14 @@ fastparquet
 lerobot==0.6.1
 
 # --- testing ---
+=======
+opencv-python-headless
+matplotlib
+pandas
+fastparquet
+pyyaml
+scikit-learn
+>>>>>>> 349e6f1f222c3b3ebb748673c1067a1949d2a4d1
 pytest
 
 # --- AI + API (later) ---

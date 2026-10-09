@@ -61,6 +61,7 @@ All required milestones (Phases 0 through 6) have been fully developed, executed
   - Shard 2: 300 ep (seeds 20,000 – 20,299)
   - Shard 3: 300 ep (seeds 30,000 – 30,299)
   - Final merged dataset written to: `out/second_look_v1/`
+  - Smoke dataset: 50 ep (seeds 90,000 – 90,049, 4,160 frames) written to: `out/smoke/` for fast toolchain verification.
 - **Class & Start Balance:**
   - Targets: `cup_red` (400, 33.33%), `bottle_blue` (400, 33.33%), `box_green` (400, 33.33%).
   - Start types: `home` (402, 33.5%), `look_L` (402, 33.5%), `look_R` (396, 33.0%).
@@ -161,10 +162,13 @@ All required milestones (Phases 0 through 6) have been fully developed, executed
 | `sim/world.py` | Modified | Added domain randomisation (lighting, camera, geom size/color) and 3rd occluder logic. |
 | `sim/scenarios.py` | Created | Scenarios S1, S2, S3, S4 engine with structured logging. |
 | `sim/test_scenarios.py`| Created | Calibration validation script for Monte Carlo verification of $q, d, f$. |
+| `sim/camera_utils.py` | Created | Camera geometry, ray-plane projection, pixel_to_table(), and table homography. |
+| `sim/test_camera_utils.py`| Created | Unit test suite verifying pixel_to_table() sub-millimeter precision on front & wrist cams. |
 | `sim/dataset_backend.py`| Created | WDAC-safe LeRobot format dataset writer and merger. |
 | `sim/make_dataset.py` | Modified | Sharded dataset generation script with 9-episode class/start balancing. |
 | `sim/merge_shards.py` | Modified | Fast shard merge tool with metadata aggregation and seed collision validation. |
 | `sim/validate_dataset.py`| Created | Comprehensive QA validation tool for state/action bounds, kinematics, and frame sync. |
+| `sim/make_recovery_dataset.py`| Created | Generator for 200-episode v1b recovery dataset (`out/second_look_v1b`). |
 | `sim/export_yolo.py` | Created | High-precision YOLO bounding box and image exporter. |
 | `sim/check_yolo_labels.py`| Created | Visual verification tool for rendered YOLO bounding boxes. |
 | `docs/C_SUMMARY.md` | Created | Comprehensive role summary and teammate handoff documentation. |
@@ -176,3 +180,4 @@ All required milestones (Phases 0 through 6) have been fully developed, executed
 1. **VLA Input Resolution:** The current dataset encodes camera images at $224 \times 224$. If OpenVLA / SmolVLA requires $256 \times 256$ or $384 \times 384$, `img=256` can be passed to `SecondLookEnv` in `make_dataset.py` without code changes.
 2. **Third Occluder in Training vs Test:** Currently, the dataset `out/second_look_v1` was generated with `third_occluder=False` (the baseline two-screen setup). We recommend evaluating zero-shot policy generalization by setting `third_occluder=True` during evaluation rollouts.
 3. **Sensor False Alarm Tuning in Teammate B's Memory Filter:** Scenario S3 demonstrated that with false alarm rate $f=0.12$, an over-reactive memory system will waste significant time checking undisturbed zones. A Bayesian confidence threshold (e.g., $P(\text{moved}) > 0.7$) should be adopted in the LLM / memory module.
+4. **Recovery Policy Fine-Tuning (v1b):** The 200 recovery demonstrations in `out/second_look_v1b` (23,138 frames) provide the explicit training signal for recovering from failed grasps (detect slip at `grip=0.0`, lift, re-target, re-grasp). Teammate B/D can co-train or fine-tune the policy on this set to improve real-world robustness.
