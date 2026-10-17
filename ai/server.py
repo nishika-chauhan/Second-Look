@@ -1,302 +1,299 @@
 """
-Second Look -- mock-mode belief/planner API (role B)
+Second Look: mock-mode belief/planner API (role B), v2.
 
-Serves the belief + planner logic over FastAPI + WebSocket so the
-dashboard (role A) can build and test against real message traffic
-before the simulator (role C/D) is wired in.
+Serves the real belief + planner code over FastAPI + WebSocket so the dashboard
+(role A) can be built and tested before the simulator is wired in.
 
-Message schema matches Part 2.2 of the team plan exactly:
-  observation   : sim -> perception
-  belief        : memory -> planner, dashboard
-  decision      : planner -> tools, dashboard
-  action_result : tools -> memory
-  episode_end   : runner -> results
-
-Run:
-    pip install fastapi "uvicorn[standard]"
+Run (from the ai/ folder):
+    pip install fastapi "uvicorn[standard]" openai
     uvicorn server:app --reload --port 8000
 
-Then connect a WebSocket client to ws://localhost:8000/ws and send:
-    {"cmd": "start", "scenario": "S2", "hidden_seconds": 40}
+Frontend origin: only http://localhost:5173 (Vite dev) and a few siblings may
+connect from a browser. Override with an environment variable, comma separated:
+    ALLOWED_ORIGINS="http://localhost:5173,https://demo.example.com"
+    ALLOWED_ORIGINS="*"            # anything (not for the final demo)
+Note that browsers do not apply CORS to WebSockets, so the /ws handler checks
+the Origin header itself. Non-browser clients (no Origin header) are accepted.
+
+Client -> server commands (JSON over ws://localhost:8000/ws):
+    {"cmd":"start", "scenario":"S2", "hidden_seconds":40, "sim_speed":5,
+     "true_place":"L", "engine":"rule"|"auto"|"llm", "move_prob":0,
+     "sensor_detect_rate":0, "false_alarm_rate":0, "grasp_fail_prob":0.1, "seed":1}
+    {"cmd":"move_object"}      # "move it while hidden" button
+    {"cmd":"reset"}
+
+Server -> client message types (plan Part 2.2):
+    observation, belief, decision, action_result, episode_end, plus
+    reset_ack and error.
 """
 
 from __future__ import annotations
 
 import asyncio
 import json
+import os
 import random
-import time
-from dataclasses import dataclass
+import sys
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 
-from ai.regions_belief import Belief, tick, place_probs, search_order
+sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
+
+import event_watcher as EW  # noqa: E402
+import planner as PL  # noqa: E402
+import regions_belief as RB  # noqa: E402
+
+DEFAULT_ORIGINS = [
+    "http://localhost:5173", "http://127.0.0.1:5173",      # Vite dev server
+    "http://localhost:4173", "http://127.0.0.1:4173",      # Vite preview
+]
 
 
-HALF_LIFE_S = 60.0
-DISTURB = 0.35
-LOOK_COST_S = {"L": 8.0, "R": 8.0}
-HIDING = ["L", "R"]
+def allowed_origins() -> list:
+    raw = os.environ.get("ALLOWED_ORIGINS", "").strip()
+    return [o.strip() for o in raw.split(",") if o.strip()] if raw else list(DEFAULT_ORIGINS)
 
 
-@dataclass
-class Belief:
-    place: str      # best-guess hiding place, e.g. "L" or "R"
-    conf: float     # confidence 0..1 that it's still there
-    t: float        # simulated-seconds timestamp of last update
+ORIGINS = allowed_origins()
 
 
-def tick(b: Belief, now: float, hidden: bool) -> None:
-    """Trust fades while the object is out of sight."""
-    if hidden:
-        b.conf *= 0.5 ** ((now - b.t) / HALF_LIFE_S)
-    b.t = now
-
-
-def place_probs(b: Belief, visible_in_front: bool) -> dict:
-    """P(object at each hiding place)."""
-    if visible_in_front:
-        return {"OPEN": 1.0}
-    p = {pl: 0.0 for pl in HIDING}
-    others = [pl for pl in HIDING if pl != b.place]
-    if b.place in p:
-        p[b.place] = b.conf
-    spread = (1.0 - b.conf) / max(len(others) + 1, 1)
-    for pl in others:
-        p[pl] += spread
-    total = sum(p.values())
-    return {pl: v / total for pl, v in p.items()}
-
-
-def search_order(b: Belief, visible_in_front: bool) -> list:
-    """Best-first search order: highest probability per second of looking."""
-    p = place_probs(b, visible_in_front)
-    return sorted((pl for pl in HIDING if pl in p), key=lambda pl: -p[pl] / LOOK_COST_S[pl])
+def origin_ok(origin: str | None) -> bool:
+    if "*" in ORIGINS or origin is None:
+        return True
+    return origin in ORIGINS
 
 
 # --------------------------------------------------------------------------
-# Message builders -- match Part 2.2's fields exactly so the dashboard never
-# has to special-case "mock" vs "real" messages.
+# Message builders (same fields as plan Part 2.2; extras are additive)
 # --------------------------------------------------------------------------
 
 def msg_observation(t, front_ref, wrist_ref, state, sensor_event=None):
-    return {
-        "type": "observation",
-        "t": round(t, 2),
-        "front_image": front_ref,
-        "wrist_image": wrist_ref,
-        "state": state,
-        "sensor_event": sensor_event,
-    }
+    return {"type": "observation", "t": round(t, 2), "front_image": front_ref,
+            "wrist_image": wrist_ref, "state": state, "sensor_event": sensor_event}
 
 
 def msg_belief(obj, place, confidence, last_seen_t, status):
-    return {
-        "type": "belief",
-        "object": obj,
-        "place": place,
-        "confidence": round(confidence, 3),
-        "last_seen_t": round(last_seen_t, 2),
-        "status": status,
-    }
+    return {"type": "belief", "object": obj, "place": place,
+            "confidence": round(confidence, 3), "last_seen_t": round(last_seen_t, 2),
+            "status": status}
 
 
-def msg_decision(engine, action, target, command, why, latency_ms):
+def msg_decision(dec: dict) -> dict:
+    """Planner decision with a stable shape: every field is always present."""
     return {
         "type": "decision",
-        "engine": engine,
-        "action": action,
-        "target": target,
-        "command": command,
-        "why": why,
-        "latency_ms": latency_ms,
+        "engine": dec["engine"],
+        "action": dec["action"],
+        "target": dec["target"],
+        "command": dec["command"],
+        "why": dec["why"],
+        "latency_ms": dec["latency_ms"],
+        "offline": bool(dec.get("offline", False)),
+        "fallback_reason": dec.get("fallback_reason", ""),
+        "model": dec.get("model", ""),
+        "agree_with_rule": dec.get("agree_with_rule"),
     }
 
 
 def msg_action_result(skill, ok, duration_s, gripper_state_at_end=None):
-    return {
-        "type": "action_result",
-        "skill": skill,
-        "ok": ok,
-        "duration_s": round(duration_s, 2),
-        "gripper_state_at_end": gripper_state_at_end,
-    }
+    return {"type": "action_result", "skill": skill, "ok": ok,
+            "duration_s": round(duration_s, 2), "gripper_state_at_end": gripper_state_at_end}
 
 
 def msg_episode_end(success, total_time_s, looks, llm_calls, ground_truth_place):
-    return {
-        "type": "episode_end",
-        "success": success,
-        "total_time_s": round(total_time_s, 2),
-        "looks": looks,
-        "llm_calls": llm_calls,
-        "ground_truth_place": ground_truth_place,
-    }
+    return {"type": "episode_end", "success": success, "total_time_s": round(total_time_s, 2),
+            "looks": looks, "llm_calls": llm_calls, "ground_truth_place": ground_truth_place}
 
 
 def belief_status(conf: float, visible: bool) -> str:
     if visible:
         return "visible"
-    if conf < 0.5:
-        return "stale"
-    return "unknown"
+    return "stale" if conf < 0.5 else "unknown"
+
+
+# One planner per mode, shared, so the Nemotron client and model list are
+# set up once and the CSV/stat log keeps accumulating.
+_PLANNERS: dict = {}
+
+
+def get_planner(mode: str) -> PL.Planner:
+    mode = {"nemotron": "llm"}.get(mode, mode)
+    if mode not in _PLANNERS:
+        _PLANNERS[mode] = PL.Planner(mode=mode)
+    return _PLANNERS[mode]
 
 
 # --------------------------------------------------------------------------
-# Mock episode runner -- simulates S2 (hidden, then fetch) and, optionally,
-# S3 (moved while hidden) without needing the real MuJoCo sim or a trained
-# VLA. Real time is compressed by `sim_speed` simulated-seconds-per-wall-
-# second so episodes play out in a few real seconds for UI development.
+# Mock episode: S2 (hide, then fetch) and S3 (object may move while hidden)
 # --------------------------------------------------------------------------
 
 class MockEpisode:
-    def __init__(self, send, scenario="S2", hidden_seconds=40.0,
-                 move_prob=0.0, sensor_detect_rate=0.0, sim_speed=5.0,
-                 true_place=None, grasp_fail_prob=0.1):
-        self.send = send  # async fn(dict) -> None
+    def __init__(self, send, scenario="S2", hidden_seconds=40.0, move_prob=0.0,
+                 sensor_detect_rate=0.0, false_alarm_rate=0.0, sim_speed=5.0,
+                 true_place=None, grasp_fail_prob=0.1, engine="rule", seed=None):
+        self.send = send
         self.scenario = scenario
-        self.hidden_seconds = hidden_seconds
+        self.hidden_seconds = float(hidden_seconds)
         self.move_prob = move_prob
         self.sensor_detect_rate = sensor_detect_rate
-        self.sim_speed = sim_speed
-        self.true_place = true_place or random.choice(HIDING)
+        self.false_alarm_rate = false_alarm_rate
+        self.sim_speed = float(sim_speed)
+        self.rng = random.Random(seed)
+        self.true_place = true_place or self.rng.choice(RB.HIDING)
         self.grasp_fail_prob = grasp_fail_prob
+        self.planner = get_planner(engine)
         self.obj = "bottle_blue"
         self.looks = 0
-        self.llm_calls = 0
+        self.move_requested = False       # set by the dashboard's "move it" button
+        self.auto_moved = False           # the scripted move happens at most once
 
     async def _sleep_sim(self, sim_seconds: float):
         await asyncio.sleep(sim_seconds / self.sim_speed)
 
+    def _other(self, place):
+        return [p for p in RB.HIDING if p != place][0]
+
     async def run(self):
         t = 0.0
-        belief = Belief(place=self.true_place, conf=1.0, t=0.0)
+        belief = RB.Belief(self.obj, self.true_place, 1.0, 0.0)
+        ctx = PL.PlanContext(obj=self.obj, now=0.0, last_seen_t=0.0)
+        log_start = len(self.planner.log)
+        state = {"x": 0, "y": 0, "z": 0.2, "gripper": 1}
 
-        await self.send(msg_observation(t, "mock://front/0.jpg", None,
-                                         {"x": 0, "y": 0, "z": 0.2, "gripper": 1}))
+        await self.send(msg_observation(t, "mock://front/0.jpg", None, state))
         await self.send(msg_belief(self.obj, belief.place, belief.conf, belief.t,
-                                    belief_status(belief.conf, False)))
+                                   belief_status(belief.conf, False)))
 
-        # Count down the hidden period in small steps so the dashboard sees
-        # confidence actually decaying, not just jump from 1.0 to some value.
+        # Hidden period, in small steps so the dashboard sees confidence decay.
         step = max(self.hidden_seconds / 10.0, 1.0)
         while t < self.hidden_seconds:
             dt = min(step, self.hidden_seconds - t)
             await self._sleep_sim(dt)
             t += dt
-            tick(belief, t, hidden=True)
+            RB.tick(belief, t, hidden=True)
+
+            alarm_zone, truly_moved = None, False
+            # S3: the "person" moves the object at most once on their own; the
+            # dashboard's button can move it again whenever it is pressed.
+            auto_move = (not self.auto_moved and self.move_prob
+                         and self.rng.random() < self.move_prob / 10.0)
+            if self.move_requested or auto_move:
+                self.auto_moved = self.auto_moved or bool(auto_move)
+                self.move_requested = False
+                old = self.true_place
+                self.true_place, truly_moved = self._other(old), True
+                if self.rng.random() < self.sensor_detect_rate:
+                    alarm_zone = old                       # sensor under the place it left
+            elif self.false_alarm_rate and self.rng.random() < self.false_alarm_rate / 10.0:
+                alarm_zone = belief.place                  # false alarm
 
             sensor_event = None
-            if self.move_prob and random.random() < self.move_prob / 10.0:
-                other = [p for p in HIDING if p != belief.place][0]
-                belief.place = other if random.random() < 0.5 else belief.place
-            if self.sensor_detect_rate and random.random() < self.sensor_detect_rate / 10.0:
-                belief.conf *= DISTURB
-                sensor_event = {"place": belief.place, "fired": True}
+            if alarm_zone:
+                ev = {"type": "event", "event": "zone_disturbed", "zone": alarm_zone,
+                      "sensor_triggered": True, "t": t, "is_false_alarm": not truly_moved}
+                EW.process_event(ev, {self.obj: belief}, t)
+                ctx.sensor_events.append((t, alarm_zone))
+                sensor_event = {"place": alarm_zone, "fired": True}
+            ctx.now = t
 
-            await self.send(msg_observation(t, "mock://front/blocked.jpg", None,
-                                             {"x": 0, "y": 0, "z": 0.2, "gripper": 1},
-                                             sensor_event))
+            await self.send(msg_observation(t, "mock://front/blocked.jpg", None, state, sensor_event))
             await self.send(msg_belief(self.obj, belief.place, belief.conf, belief.t,
-                                        belief_status(belief.conf, False)))
+                                       belief_status(belief.conf, False)))
 
-        # Fetch: decide where to look first.
-        order = search_order(belief, visible_in_front=False)
-        found_place = None
-        for target in order:
-            reason = self._why(order, target)
-            await self.send(msg_decision("rule", "look", target,
-                                          f"look at {target}", reason,
-                                          random.randint(5, 40)))
+        # Fetch: let the planner choose where to look until the object is found.
+        found = False
+        for _ in range(len(RB.HIDING) + 1):
+            dec = await asyncio.to_thread(self.planner.decide, belief, ctx, False)
+            await self.send(msg_decision(dec))
+            if dec["action"] != "look":
+                break                                      # ask / finish: stop searching
+            target = dec["target"]
             self.looks += 1
-            cost = LOOK_COST_S[target]
+            cost = RB.LOOK_COST_S[target]
             await self._sleep_sim(cost)
             t += cost
-            ok = (target == self.true_place)
-            await self.send(msg_action_result("look", ok, cost))
-
-            if ok:
-                belief.place, belief.conf, belief.t = target, 1.0, t
-                found_place = target
+            found = target == self.true_place
+            await self.send(msg_action_result("look", found, cost))
+            PL.note_look_result(belief, ctx, target, found, t)
+            if found:
                 await self.send(msg_belief(self.obj, belief.place, belief.conf, belief.t, "visible"))
                 break
-            else:
-                remaining = [p for p in HIDING if p != target]
-                if remaining:
-                    belief.place, belief.conf, belief.t = remaining[0], 1.0, t
-                await self.send(msg_belief(self.obj, belief.place, belief.conf, belief.t, "unknown"))
+            await self.send(msg_belief(self.obj, belief.place, belief.conf, belief.t, "unknown"))
 
         success = False
-        if found_place:
-            command = f"pick up the {self.obj.replace('_', ' ')} and place it in the tray"
-            await self.send(msg_decision("rule", "pick", self.obj, command,
-                                          "Target is visible; executing the pick.",
-                                          random.randint(5, 20)))
+        if found:
+            dec = await asyncio.to_thread(self.planner.decide, belief, ctx, True)
+            await self.send(msg_decision(dec))
             pick_cost = 6.0
             await self._sleep_sim(pick_cost)
             t += pick_cost
-            grasp_ok = random.random() > self.grasp_fail_prob
-            gripper_end = 0.4 if grasp_ok else 0.0
-            await self.send(msg_action_result("pick", grasp_ok, pick_cost, gripper_end))
-
+            grasp_ok = self.rng.random() >= self.grasp_fail_prob
+            await self.send(msg_action_result("pick", grasp_ok, pick_cost, 0.4 if grasp_ok else 0.0))
             if not grasp_ok:
-                belief.conf = 0.05
+                PL.note_grasp_result(belief, ctx, False, t)
                 await self.send(msg_belief(self.obj, belief.place, belief.conf, belief.t, "stale"))
-                # one retry, matching the doc's "failed grasp -> replan" evidence path
-                await self.send(msg_decision("rule", "pick", self.obj, command,
-                                              "Grasp failed; re-approaching.",
-                                              random.randint(5, 20)))
+                retry = await asyncio.to_thread(self.planner.decide, belief, ctx, True)
+                retry["why"] = "Grasp failed; re-approaching the visible object."
+                await self.send(msg_decision(retry))
                 await self._sleep_sim(pick_cost)
                 t += pick_cost
-                grasp_ok = True
-                await self.send(msg_action_result("pick", grasp_ok, pick_cost, 0.4))
-
+                grasp_ok = True                            # mock: the retry always works
+                await self.send(msg_action_result("pick", True, pick_cost, 0.4))
             success = grasp_ok
+            ctx.delivered = success
 
-        await self.send(msg_episode_end(success, t, self.looks, self.llm_calls, self.true_place))
-
-    def _why(self, order: list, target: str) -> str:
-        if len(order) > 1 and target == order[0]:
-            other = order[1]
-            return (f"{target} is the more likely spot right now "
-                    f"(confidence favors {target} over {other}), checking there first.")
-        return f"Checking {target}."
+        llm_calls = sum(1 for r in self.planner.log[log_start:] if r["llm_attempted"])
+        await self.send(msg_episode_end(success, t, self.looks, llm_calls, self.true_place))
 
 
 # --------------------------------------------------------------------------
 # FastAPI app
 # --------------------------------------------------------------------------
 
-app = FastAPI(title="Second Look -- mock belief/planner API")
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],   # tighten this once the dashboard has a fixed origin
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+app = FastAPI(title="Second Look: mock belief/planner API")
+app.add_middleware(CORSMiddleware, allow_origins=ORIGINS, allow_methods=["*"], allow_headers=["*"])
 
 
 @app.get("/")
 async def root():
-    # FastAPI has no route at "/" by default, hence the 404 you saw there.
-    # Send browsers to the interactive docs instead.
     return RedirectResponse(url="/docs")
 
 
 @app.get("/health")
 async def health():
-    return {"ok": True}
+    return {"ok": True, "allowed_origins": ORIGINS}
 
 
 @app.websocket("/ws")
 async def ws_endpoint(websocket: WebSocket):
+    origin = websocket.headers.get("origin")
+    if not origin_ok(origin):
+        await websocket.close(code=1008)                   # policy violation
+        return
     await websocket.accept()
 
     async def send(payload: dict):
         await websocket.send_text(json.dumps(payload))
+
+    current: dict = {"episode": None, "task": None}
+
+    async def run_episode(ep: MockEpisode):
+        try:
+            await ep.run()
+        except asyncio.CancelledError:
+            raise
+        except Exception as e:                             # never let a bug kill the socket silently
+            try:
+                await send({"type": "error", "why": f"episode failed: {type(e).__name__}: {e}"})
+            except Exception:
+                pass
+
+    def cancel_current():
+        task = current["task"]
+        if task and not task.done():
+            task.cancel()
 
     try:
         while True:
@@ -307,24 +304,43 @@ async def ws_endpoint(websocket: WebSocket):
                 await send({"type": "error", "why": "bad JSON"})
                 continue
 
-            if cmd.get("cmd") == "start":
-                episode = MockEpisode(
+            name = cmd.get("cmd")
+            if name == "start":
+                engine = cmd.get("engine", "rule")
+                if engine not in ("rule", "auto", "llm", "nemotron"):
+                    await send({"type": "error", "why": f"unknown engine {engine!r}"})
+                    continue
+                cancel_current()
+                ep = MockEpisode(
                     send=send,
                     scenario=cmd.get("scenario", "S2"),
                     hidden_seconds=cmd.get("hidden_seconds", 40.0),
                     move_prob=cmd.get("move_prob", 0.0),
                     sensor_detect_rate=cmd.get("sensor_detect_rate", 0.0),
+                    false_alarm_rate=cmd.get("false_alarm_rate", 0.0),
                     sim_speed=cmd.get("sim_speed", 5.0),
                     true_place=cmd.get("true_place"),
                     grasp_fail_prob=cmd.get("grasp_fail_prob", 0.1),
+                    engine=engine,
+                    seed=cmd.get("seed"),
                 )
-                asyncio.create_task(episode.run())
-            elif cmd.get("cmd") == "reset":
+                current["episode"] = ep
+                current["task"] = asyncio.create_task(run_episode(ep))
+            elif name == "move_object":
+                ep = current["episode"]
+                if ep and current["task"] and not current["task"].done():
+                    ep.move_requested = True
+                else:
+                    await send({"type": "error", "why": "no running episode to move the object in"})
+            elif name == "reset":
+                cancel_current()
                 await send({"type": "reset_ack"})
             else:
-                await send({"type": "error", "why": f"unknown cmd {cmd.get('cmd')!r}"})
+                await send({"type": "error", "why": f"unknown cmd {name!r}"})
     except WebSocketDisconnect:
         pass
+    finally:
+        cancel_current()
 
 
 if __name__ == "__main__":
