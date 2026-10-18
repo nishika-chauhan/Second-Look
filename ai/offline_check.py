@@ -1,34 +1,48 @@
 """Offline sanity check of the fine-tuned SmolVLA checkpoint (Week 3, T1 follow-up).
 
-Loads the checkpoint, runs it on frames from C's dataset, and compares the
-predicted action with the recorded (expert) action. A trained model should
-beat the trivial baseline "always predict the dataset's mean action".
+Loads the checkpoint, runs it on random frames from the training dataset and
+compares the predicted action with the recorded (expert) action. A trained
+model should beat the trivial baseline "always predict the dataset mean".
 
-This does NOT prove the robot succeeds in closed loop; it only proves the
-model learned something and that the checkpoint loads and runs.
+Run it with the Python that has LeRobot installed (the lr_env from training):
 
-Run (needs a GPU or a lot of patience on CPU; Kaggle/Colab is fine):
-    python ai/offline_check.py \
-        --checkpoint out/smolvla_run1 \
-        --dataset out/second_look_v1 \
-        --n 16
+    !/kaggle/working/lr_env/bin/python /kaggle/working/offline_check.py
 
---checkpoint may be the folder you unzipped, or the pretrained_model folder
-inside it; the script searches for config.json + model.safetensors.
+Defaults below are the Kaggle paths from the training notebook; override with
+--checkpoint / --dataset if yours differ.
+
+This does NOT prove the robot succeeds in closed loop. It only shows that the
+checkpoint loads, runs, and learned something.
 """
 
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 from pathlib import Path
+
+# Jupyter sets MPLBACKEND to its inline backend, which does not exist inside
+# the training venv. Force a file-only backend before matplotlib is imported.
+os.environ["MPLBACKEND"] = "Agg"
 
 import numpy as np
 import torch
 
+DEFAULT_CKPT = "/kaggle/input/models/globalgems/smolvla/other/default/1/smolvla_run1"
+DEFAULT_DS = "/kaggle/input/datasets/globalgems/second-look-v2/second_look_v2"
+
+# Same renaming used in training (lerobot-train --rename_map=...).
+RENAME = {
+    "observation.images.front": "observation.images.camera1",
+    "observation.images.wrist": "observation.images.camera2",
+}
+
 
 def find_pretrained_dir(root: Path) -> Path:
-    """Find the folder that holds config.json and model.safetensors."""
+    """Folder that holds config.json + model.safetensors (root or below it)."""
+    if root.is_file():
+        root = root.parent
     cands = [root] + [p.parent for p in root.rglob("model.safetensors")]
     for c in cands:
         if (c / "config.json").exists() and (c / "model.safetensors").exists():
@@ -37,9 +51,10 @@ def find_pretrained_dir(root: Path) -> Path:
 
 
 def to_batch(sample: dict, device: str) -> dict:
-    """Add a batch dim to tensors, keep strings as 1-item lists."""
+    """Rename cameras, add a batch dim to tensors, wrap strings in a list."""
     out = {}
     for k, v in sample.items():
+        k = RENAME.get(k, k)
         if isinstance(v, torch.Tensor):
             out[k] = v.unsqueeze(0).to(device)
         elif isinstance(v, str):
@@ -49,8 +64,8 @@ def to_batch(sample: dict, device: str) -> dict:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--checkpoint", required=True)
-    ap.add_argument("--dataset", default="out/second_look_v1")
+    ap.add_argument("--checkpoint", default=DEFAULT_CKPT)
+    ap.add_argument("--dataset", default=DEFAULT_DS)
     ap.add_argument("--n", type=int, default=16, help="frames to test")
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--plot", default="offline_check.png")
@@ -58,32 +73,26 @@ def main() -> None:
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     ckpt = find_pretrained_dir(Path(args.checkpoint))
-    print(f"device={device}  checkpoint={ckpt}")
+    print(f"device={device}\ncheckpoint={ckpt}\ndataset={args.dataset}")
 
-    # Imports are inside main so a missing LeRobot gives a readable error.
-    from lerobot.datasets.lerobot_dataset import LeRobotDataset
+    try:
+        from lerobot.datasets import LeRobotDataset
+    except ImportError:
+        from lerobot.datasets.lerobot_dataset import LeRobotDataset
     from lerobot.policies.smolvla.modeling_smolvla import SmolVLAPolicy
 
     ds_root = Path(args.dataset)
-    ds = LeRobotDataset(repo_id=f"local/{ds_root.name}", root=ds_root)
+    ds = LeRobotDataset(f"local/{ds_root.name}", root=ds_root, video_backend="pyav")
     print(f"dataset: {ds.num_episodes} episodes, {len(ds)} frames")
 
     policy = SmolVLAPolicy.from_pretrained(str(ckpt)).to(device).eval()
 
-    # Newer LeRobot keeps normalisation in pre/post processors. Older keeps it
-    # inside the policy. Support both.
-    pre = post = None
-    try:
-        from lerobot.policies.factory import make_pre_post_processors
+    # The final_model folder contains the saved pre/post processors
+    # (normalisation stats included), so load those rather than rebuilding.
+    from lerobot.policies.factory import make_pre_post_processors
 
-        pre, post = make_pre_post_processors(
-            policy.config,
-            pretrained_path=str(ckpt),
-            dataset_stats=ds.meta.stats,
-        )
-        print("using pre/post processors")
-    except Exception as e:  # noqa: BLE001
-        print(f"no processors ({type(e).__name__}); using policy-internal normalisation")
+    pre, post = make_pre_post_processors(policy.config, pretrained_path=str(ckpt))
+    print("loaded saved pre/post processors")
 
     rng = np.random.default_rng(args.seed)
     idxs = sorted(rng.choice(len(ds), size=args.n, replace=False).tolist())
@@ -91,24 +100,19 @@ def main() -> None:
     preds, truth = [], []
     for i in idxs:
         sample = ds[i]
-        batch = to_batch(sample, device)
-        if pre is not None:
-            batch = pre(batch)
+        batch = pre(to_batch(sample, device))
         policy.reset()
         with torch.no_grad():
             act = policy.select_action(batch)
-        if post is not None:
-            act = post(act)
+        act = post(act)
         preds.append(act.squeeze(0).float().cpu().numpy())
         truth.append(sample["action"].float().numpy())
 
     preds, truth = np.stack(preds), np.stack(truth)
 
-    # Baseline: always predict the mean action over the whole dataset.
-    all_actions = np.stack(
-        [ds[j]["action"].float().numpy() for j in range(0, len(ds), max(1, len(ds) // 2000))]
-    )
-    baseline = np.broadcast_to(all_actions.mean(0), truth.shape)
+    # Baseline: always predict the dataset's mean action (from saved stats).
+    mean_action = np.asarray(ds.meta.stats["action"]["mean"], dtype=np.float32).reshape(-1)
+    baseline = np.broadcast_to(mean_action, truth.shape)
 
     mae_model = np.abs(preds - truth).mean(0)
     mae_base = np.abs(baseline - truth).mean(0)
@@ -117,10 +121,11 @@ def main() -> None:
     print("dim   model    mean-baseline")
     for d, (m, b) in enumerate(zip(mae_model, mae_base)):
         print(f"{d:>3}  {m:7.4f}  {b:7.4f}")
-    print(f"\nOVERALL  model={mae_model.mean():.4f}  baseline={mae_base.mean():.4f}")
-    verdict = "learned something" if mae_model.mean() < mae_base.mean() else "NOT better than baseline"
-    print(f"verdict: {verdict}")
-    print("(dims 4 and 5 are roll/pitch, constant zero: ignore them)")
+    # Dims 4 and 5 (roll/pitch) are constant zero, so leave them out of the verdict.
+    keep = [d for d in range(truth.shape[1]) if d not in (3, 4)]
+    m_all, b_all = mae_model[keep].mean(), mae_base[keep].mean()
+    print(f"\nOVERALL (dims 0,1,2,5): model={m_all:.4f}  baseline={b_all:.4f}")
+    print("verdict:", "learned something" if m_all < b_all else "NOT better than baseline")
 
     try:
         import matplotlib
@@ -139,7 +144,7 @@ def main() -> None:
         fig.savefig(args.plot, dpi=120)
         print(f"saved plot -> {args.plot}")
     except ImportError:
-        print("matplotlib not installed; skipped plot")
+        print("matplotlib not installed in this env; skipped plot")
 
 
 if __name__ == "__main__":
