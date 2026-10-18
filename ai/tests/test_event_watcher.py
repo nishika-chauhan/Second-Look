@@ -76,3 +76,14 @@ def test_plan_worked_example_order_flips_after_alarm():
     p = RB.place_probs(b, False)
     assert p["L"] == pytest.approx(0.42, abs=0.01) and p["R"] == pytest.approx(0.58, abs=0.01)
     assert RB.search_order(b, False)[0] == "R"
+
+
+def test_accepts_c_log_schema_and_live_obs_events():
+    log = {"type": "event", "episode_id": "S3-seed80100-cup_red", "t": 12.4,
+           "kind": "zone_disturbed", "zone": "L", "sensor_triggered": True,
+           "is_false_alarm": False}
+    live = {"kind": "zone_disturbed", "zone": "L", "t": 12.4}
+    for ev in (log, live):
+        b = belief("L", 1.0, 12.4)
+        assert EW.process_event(ev, {"o": b}, now=12.4) is True
+        assert b.conf == pytest.approx(RB.DISTURB)

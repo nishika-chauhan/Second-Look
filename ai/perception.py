@@ -35,30 +35,33 @@ import numpy as np
 # ---------------------------------------------------------------------------
 # Camera ↔ table geometry
 # ---------------------------------------------------------------------------
-# Wrist camera: 224×224, mounted 0.30 m above the table surface, pointing
-# straight down.  FOV ≈ 90° → each pixel spans ~(0.30 * 2 / 224) ≈ 2.68 mm.
-# Image centre = robot wrist position (table_x=0, table_y=0 in wrist frame).
-# Positive x → right in the image; positive y → up in the image.
-# These numbers are tunable when C publishes the exact camera intrinsics.
+# Wrist camera (numbers confirmed by C, 18 Oct): 224×224, fovy = 60° (square
+# image, so horizontal FOV is also 60°), optical axis straight down (-Z).
+# Camera sits 0.14 m above the gripper fingertips:
+#   look/hover ≈ 0.34 m above tabletop, transit ≈ 0.26 m, grasp ≈ 0.20 m.
+# Image right = world +X, image top = world +Y (back of the table).
+# Image centre = the point directly under the camera.
 
 WRIST_IMG_W = 224
 WRIST_IMG_H = 224
-WRIST_HEIGHT_M = 0.30          # metres above table surface
-WRIST_FOV_DEG = 90.0           # full horizontal field of view
+WRIST_HEIGHT_M = 0.34          # look altitude, metres above tabletop
+WRIST_FOV_DEG = 60.0           # full horizontal field of view
 
 _px_per_m = WRIST_IMG_W / (2.0 * WRIST_HEIGHT_M * np.tan(np.radians(WRIST_FOV_DEG / 2.0)))
 _cx = WRIST_IMG_W / 2.0
 _cy = WRIST_IMG_H / 2.0
 
 
-def px_to_table(px_col: float, px_row: float) -> tuple[float, float]:
+def px_to_table(px_col: float, px_row: float,
+                cam_height: float = WRIST_HEIGHT_M) -> tuple[float, float]:
     """Convert wrist-image pixel (col, row) to table-frame (x, y) in metres.
 
     Origin is the pixel centre (112, 112).  x increases rightward, y upward
     (away from camera in the image's top-left-origin row convention).
     """
-    x = (px_col - _cx) / _px_per_m
-    y = -((px_row - _cy) / _px_per_m)   # row↑ = y↓ in image, so flip
+    px_per_m = WRIST_IMG_W / (2.0 * cam_height * np.tan(np.radians(WRIST_FOV_DEG / 2.0)))
+    x = (px_col - _cx) / px_per_m
+    y = -((px_row - _cy) / px_per_m)   # row↑ = y↓ in image, so flip
     return round(x, 4), round(y, 4)
 
 

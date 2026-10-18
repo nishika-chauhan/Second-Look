@@ -32,8 +32,12 @@ import regions_belief as RB  # noqa: E402
 
 
 def is_alarm(event: dict) -> bool:
-    return (event.get("type") == "event" and event.get("event") == "zone_disturbed"
-            and bool(event.get("sensor_triggered", True)))
+    # C's log: {"type":"event","kind":"zone_disturbed",...}; live obs["events"]
+    # entries have "kind" only; our own server uses "event". Accept all.
+    name = event.get("kind", event.get("event"))
+    if event.get("type", "event") != "event":
+        return False
+    return name == "zone_disturbed" and bool(event.get("sensor_triggered", True))
 
 
 def process_event(event: dict, beliefs: dict, now: float, verbose: bool = False) -> bool:
