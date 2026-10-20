@@ -74,8 +74,11 @@ def msg_observation(t, front_ref, wrist_ref, state, sensor_event=None):
             "wrist_image": wrist_ref, "state": state, "sensor_event": sensor_event}
 
 
-def msg_belief(obj, place, confidence, last_seen_t, status):
-    return {"type": "belief", "object": obj, "place": place,
+def msg_belief(obj, place, confidence, last_seen_t, status, t=None):
+    """`t` is the simulation time of this belief (x-axis for a confidence chart);
+    `last_seen_t` is when the object was last actually seen."""
+    return {"type": "belief", "t": round(last_seen_t if t is None else t, 2),
+            "object": obj, "place": place,
             "confidence": round(confidence, 3), "last_seen_t": round(last_seen_t, 2),
             "status": status}
 
@@ -168,7 +171,7 @@ class MockEpisode:
 
         await self.send(msg_observation(t, "mock://front/0.jpg", None, state))
         await self.send(msg_belief(self.obj, belief.place, belief.conf, belief.t,
-                                   belief_status(belief.conf, False)))
+                                   belief_status(belief.conf, False), t=t))
 
         # Hidden period, in small steps so the dashboard sees confidence decay.
         step = max(self.hidden_seconds / 10.0, 1.0)
@@ -204,7 +207,7 @@ class MockEpisode:
 
             await self.send(msg_observation(t, "mock://front/blocked.jpg", None, state, sensor_event))
             await self.send(msg_belief(self.obj, belief.place, belief.conf, belief.t,
-                                       belief_status(belief.conf, False)))
+                                       belief_status(belief.conf, False), t=t))
 
         # Fetch: let the planner choose where to look until the object is found.
         found = False
@@ -222,9 +225,9 @@ class MockEpisode:
             await self.send(msg_action_result("look", found, cost))
             PL.note_look_result(belief, ctx, target, found, t)
             if found:
-                await self.send(msg_belief(self.obj, belief.place, belief.conf, belief.t, "visible"))
+                await self.send(msg_belief(self.obj, belief.place, belief.conf, belief.t, "visible", t=t))
                 break
-            await self.send(msg_belief(self.obj, belief.place, belief.conf, belief.t, "unknown"))
+            await self.send(msg_belief(self.obj, belief.place, belief.conf, belief.t, "unknown", t=t))
 
         success = False
         if found:
@@ -237,7 +240,7 @@ class MockEpisode:
             await self.send(msg_action_result("pick", grasp_ok, pick_cost, 0.4 if grasp_ok else 0.0))
             if not grasp_ok:
                 PL.note_grasp_result(belief, ctx, False, t)
-                await self.send(msg_belief(self.obj, belief.place, belief.conf, belief.t, "stale"))
+                await self.send(msg_belief(self.obj, belief.place, belief.conf, belief.t, "stale", t=t))
                 retry = await asyncio.to_thread(self.planner.decide, belief, ctx, True)
                 retry["why"] = "Grasp failed; re-approaching the visible object."
                 await self.send(msg_decision(retry))

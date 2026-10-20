@@ -162,3 +162,13 @@ def test_auto_engine_without_api_key_falls_back_but_still_finishes(monkeypatch):
     looks = [m for m in msgs if m["type"] == "decision" and m["action"] == "look"]
     assert looks[0]["offline"] is True and "NEBIUS_API_KEY" in looks[0]["fallback_reason"]
     S._PLANNERS.pop("auto", None)
+
+
+def test_belief_messages_carry_sim_time():
+    with client.websocket_connect("/ws") as ws:
+        ws.send_json({**FAST, "hidden_seconds": 60, "true_place": "R"})
+        msgs = collect(ws)
+    beliefs = [m for m in msgs if m["type"] == "belief"]
+    assert all("t" in b for b in beliefs)
+    ts = [b["t"] for b in beliefs]
+    assert ts == sorted(ts) and ts[0] == 0.0 and ts[-1] > 60
