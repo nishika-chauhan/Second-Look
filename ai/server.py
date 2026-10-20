@@ -122,6 +122,10 @@ def get_planner(mode: str) -> PL.Planner:
     mode = {"nemotron": "llm"}.get(mode, mode)
     if mode not in _PLANNERS:
         _PLANNERS[mode] = PL.Planner(mode=mode)
+        if mode != "rule":
+            # first use: warm the connection in the background so the first decision is fast
+            import threading
+            threading.Thread(target=_PLANNERS[mode].warm_up, daemon=True).start()
     return _PLANNERS[mode]
 
 

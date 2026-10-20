@@ -56,7 +56,7 @@ OBJECTS = {"cup_red": "red cup", "bottle_blue": "blue bottle", "box_green": "gre
 PLACE_NAMES = {"L": "left screen", "R": "right screen"}
 ACTIONS = ("look", "pick", "ask", "finish")
 
-TIMEOUT_S = 5.0          # plan: fall back if the call takes longer than 5 s
+TIMEOUT_S = float(os.environ.get("PLANNER_TIMEOUT_S", "5.0"))   # plan: fall back after 5 s (override via env or --timeout)
 MARGIN = 0.25            # top-two probability gap below this counts as "unclear"
 
 
@@ -349,6 +349,20 @@ class Planner:
             self._llm_error, self._error_at = f"{type(e).__name__}: {e}"[:200], time.monotonic()
             raise LLMUnavailable(self._llm_error) from e
 
+    def warm_up(self) -> dict:
+        """Connect, list models and send one tiny request so the first real decision
+        does not pay for the TLS handshake and cold model start. Never raises."""
+        t0 = time.monotonic()
+        try:
+            client, models = self._ensure_llm()
+            model = models.get("small") or next(iter(models.values()))
+            client.chat.completions.create(model=model, max_tokens=4, temperature=0,
+                                           messages=[{"role": "user", "content": "ok"}])
+            return {"ok": True, "model": model, "ms": int((time.monotonic() - t0) * 1000)}
+        except Exception as e:
+            return {"ok": False, "error": f"{type(e).__name__}: {e}"[:200],
+                    "ms": int((time.monotonic() - t0) * 1000)}
+
     def _call_llm(self, b, ctx, visible, p, tier) -> tuple[dict, str, int]:
         client, models = self._ensure_llm()
         model = models.get(tier) or models["small"]
@@ -445,9 +459,11 @@ class Planner:
 # Demo
 # ---------------------------------------------------------------------------
 
-def _demo(mode: str) -> None:
-    planner = Planner(mode=mode)
-    print(f"mode={mode}\n")
+def _demo(mode: str, timeout: float = TIMEOUT_S) -> None:
+    planner = Planner(mode=mode, timeout_s=timeout)
+    print(f"mode={mode}  timeout={timeout}s\n")
+    if mode != "rule":
+        print("warm-up:", planner.warm_up(), "\n")
 
     cases = []
     b = RB.Belief("bottle_blue", "L", 0.75, 25.0)
@@ -473,4 +489,6 @@ def _demo(mode: str) -> None:
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--mode", default="rule", choices=["rule", "auto", "llm"])
-    _demo(ap.parse_args().mode)
+    ap.add_argument("--timeout", type=float, default=TIMEOUT_S, help="LLM timeout in seconds (plan: 5)")
+    a = ap.parse_args()
+    _demo(a.mode, a.timeout)

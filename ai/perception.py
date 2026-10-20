@@ -38,13 +38,16 @@ import numpy as np
 # Wrist camera (numbers confirmed by C, 18 Oct): 224×224, fovy = 60° (square
 # image, so horizontal FOV is also 60°), optical axis straight down (-Z).
 # Camera sits 0.14 m above the gripper fingertips:
-#   look/hover ≈ 0.34 m above tabletop, transit ≈ 0.26 m, grasp ≈ 0.20 m.
+#   Measured from C's 30 sample frames (metadata.json): camera ≈ 0.43–0.46 m
+#   above the table at look poses, centred on the gripper in x and y.
+#   (C's first answer of 0.34 m was wrong; the second, 0.44 m, is right.)
+#   Pass cam_height = camera z minus object-top z (~0.40 m at look poses).
 # Image right = world +X, image top = world +Y (back of the table).
 # Image centre = the point directly under the camera.
 
 WRIST_IMG_W = 224
 WRIST_IMG_H = 224
-WRIST_HEIGHT_M = 0.34          # look altitude, metres above tabletop
+WRIST_HEIGHT_M = 0.40          # look poses: camera 0.44 m up, object tops ~0.04 m, so ~0.40 m
 WRIST_FOV_DEG = 60.0           # full horizontal field of view
 
 _px_per_m = WRIST_IMG_W / (2.0 * WRIST_HEIGHT_M * np.tan(np.radians(WRIST_FOV_DEG / 2.0)))
@@ -111,6 +114,7 @@ def _largest_blob(mask: np.ndarray) -> Optional[tuple[float, float, float]]:
 def detect_objects(
     wrist_img_rgb: np.ndarray,
     min_blob_area: int = MIN_BLOB_AREA,
+    cam_height: float = WRIST_HEIGHT_M,
 ) -> dict[str, Optional[tuple[float, float]]]:
     """Detect coloured objects in a wrist-camera image.
 
@@ -148,7 +152,7 @@ def detect_objects(
             results[obj] = None
         else:
             cx, cy, _ = blob
-            results[obj] = px_to_table(cx, cy)
+            results[obj] = px_to_table(cx, cy, cam_height)
 
     return results
 

@@ -120,7 +120,8 @@ def summarize(rows: list) -> list[str]:
 class SmolVLARunner:
     """Wraps the checkpoint the same way ai/offline_check.py did (that check passed)."""
 
-    def __init__(self, checkpoint: str, device: str | None = None):
+    def __init__(self, checkpoint: str, device: str | None = None,
+                 n_action_steps: int | None = None):
         import torch
         from lerobot.policies.factory import make_pre_post_processors
         from lerobot.policies.smolvla.modeling_smolvla import SmolVLAPolicy
@@ -132,6 +133,14 @@ class SmolVLARunner:
             ckpt = ckpt.parent
         self.policy = SmolVLAPolicy.from_pretrained(str(ckpt)).to(self.device).eval()
         self.pre, self.post = make_pre_post_processors(self.policy.config, pretrained_path=str(ckpt))
+        cfg = self.policy.config
+        print(f"policy chunk_size={getattr(cfg, 'chunk_size', '?')} "
+              f"n_action_steps={getattr(cfg, 'n_action_steps', '?')}")
+        if n_action_steps is not None:
+            # execute only the first N actions of each predicted chunk, then re-plan
+            cfg.n_action_steps = int(n_action_steps)
+            self.policy.reset()
+            print(f"n_action_steps overridden to {cfg.n_action_steps}")
 
     def reset(self) -> None:
         self.policy.reset()          # clears the queued action chunk between episodes
@@ -181,6 +190,8 @@ def main() -> None:
     ap.add_argument("--seed0", type=int, default=100000,
                     help="first seed. Keep it far from the training seeds (C generated from small seeds)")
     ap.add_argument("--max-steps", type=int, default=400, help="10 Hz, so 400 = 40 simulated seconds")
+    ap.add_argument("--n-action-steps", type=int, default=None,
+                    help="re-plan every N steps instead of the checkpoint default (try 10)")
     ap.add_argument("--out", default="rollout_results.csv")
     args = ap.parse_args()
 
@@ -191,7 +202,7 @@ def main() -> None:
     if args.policy == "smolvla":
         if not args.checkpoint:
             sys.exit("--checkpoint is required for --policy smolvla")
-        runner = SmolVLARunner(args.checkpoint)
+        runner = SmolVLARunner(args.checkpoint, n_action_steps=args.n_action_steps)
         print(f"loaded {args.checkpoint} on {runner.device}")
 
     rows = []
