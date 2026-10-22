@@ -1,0 +1,44 @@
+# Tested on Python 3.12 (Windows).
+# Install order matters: torch first, from the CPU index, then this file.
+#
+#   py -3.12 -m venv .venv
+#   .venv\Scripts\Activate.ps1
+#   python -m pip install --upgrade pip
+#   pip install torch==2.11.0 torchvision==0.26.0 --index-url https://download.pytorch.org/whl/cpu
+#   pip install -r requirements.txt
+
+# --- simulation and data ---
+mujoco>=3.1
+numpy
+pandas
+matplotlib
+scikit-learn
+imageio
+imageio-ffmpeg
+opencv-python
+fastparquet
+
+# --- LeRobot dataset writer / merge / viewer ---
+lerobot==0.6.1
+
+# --- testing ---
+
+opencv-python-headless
+matplotlib
+pandas
+fastparquet
+pyyaml
+scikit-learn
+
+pytest
+
+# --- AI + API (later) ---
+openai>=1.0
+pydantic>=2
+fastapi
+uvicorn[standard]
+websockets
+
+# --- training (install only on the machine that needs it) ---
+#   pip install "lerobot[training]"   GR00T / SmolVLA training
+#   pip install "lerobot[smolvla]"    SmolVLA

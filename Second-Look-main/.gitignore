@@ -1,0 +1,19 @@
+__pycache__/
+*.pyc
+.venv/
+.env
+out/
+outputs/
+*.mp4
+node_modules/
+.DS_Store
+
+# added for dataset/training work
+*.zip
+*.parquet
+*.safetensors
+*.pt
+*.ckpt
+wandb/
+.pytest_cache/
+.vscode/
