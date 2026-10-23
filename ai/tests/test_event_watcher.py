@@ -1,13 +1,12 @@
 """
-pytest for the event watcher / zone-disturbed integration (ai/event_watcher.py).
+pytest for ai/event_watcher.py. One alarm at the remembered place cuts confidence
+by DISTURB, exactly as in plan Part 6.1 / the worked example in Part 1.1.
 
-Run from repo root:
     pytest ai/tests/test_event_watcher.py -v
 """
 
 import os
 import sys
-from types import SimpleNamespace
 
 import pytest
 
@@ -17,113 +16,74 @@ import regions_belief as RB
 import event_watcher as EW
 
 
-def make_belief(place="L", conf=1.0, t=0.0):
-    b = RB.Belief(name="bottle_blue", place=place, conf=conf, t=t)
-    return b
+def belief(place="L", conf=1.0, t=0.0, name="bottle_blue"):
+    return RB.Belief(name=name, place=place, conf=conf, t=t)
 
 
-def make_event(zone="L", triggered=True, t=10.0):
-    return {"type": "event", "event": "zone_disturbed",
-            "zone": zone, "sensor_triggered": triggered, "t": t}
+def alarm(zone="L", t=10.0, triggered=True):
+    return {"type": "event", "event": "zone_disturbed", "zone": zone,
+            "sensor_triggered": triggered, "t": t}
 
 
-# ---------------------------------------------------------------------------
-# P_MOVED_THRESHOLD gating
-# ---------------------------------------------------------------------------
-
-def test_first_same_zone_alarm_ignored():
-    """First alarm at the remembered place has p_moved ≈ 0.40 → below threshold."""
-    b = make_belief("L", conf=1.0)
-    beliefs = {"bottle_blue": b}
-    acted = EW.process_event(make_event(zone="L"), beliefs, now=10.0)
-    assert not acted, "first same-zone alarm should be below P_MOVED_THRESHOLD"
-    assert b.conf == pytest.approx(1.0, abs=1e-6), "confidence should not change"
+def test_single_alarm_at_remembered_place_cuts_confidence():
+    b = belief("L", conf=1.0, t=10.0)
+    assert EW.process_event(alarm("L", 10.0), {"o": b}, now=10.0) is True
+    assert b.conf == pytest.approx(RB.DISTURB)
 
 
-def test_different_zone_alarm_acted_on():
-    """Alarm at a DIFFERENT zone than remembered → p_moved=0.85 → threshold met."""
-    b = make_belief("L", conf=1.0)
-    beliefs = {"bottle_blue": b}
-    acted = EW.process_event(make_event(zone="R"), beliefs, now=10.0)
-    assert acted, "alarm at different zone should be acted on"
-    assert b.conf < 1.0, "confidence should drop after disturbed()"
-
-
-def test_second_same_zone_alarm_acted_on():
-    """Second alarm at the same zone → p_moved=0.75 → threshold met."""
-    b = make_belief("L", conf=1.0)
-    beliefs = {"bottle_blue": b}
-    counts: dict = {}
-    # First alarm — ignored
-    EW.process_event(make_event(zone="L", t=10.0), beliefs, now=10.0, alarm_counts=counts)
-    # Second alarm — should act
-    acted = EW.process_event(make_event(zone="L", t=20.0), beliefs, now=20.0, alarm_counts=counts)
-    assert acted, "second same-zone alarm should be acted on"
-    assert b.conf < 1.0
+def test_alarm_at_other_place_only_advances_clock():
+    b = belief("L", conf=1.0, t=0.0)
+    cut = EW.process_event(alarm("R", 10.0), {"o": b}, now=10.0)
+    assert cut is False
+    assert b.conf == pytest.approx(0.5 ** (10.0 / RB.HALF_LIFE_S))   # decay only
+    assert b.t == 10.0
 
 
 def test_untriggered_sensor_ignored():
-    b = make_belief("L", conf=1.0)
-    beliefs = {"bottle_blue": b}
-    event = make_event(zone="R", triggered=False)
-    acted = EW.process_event(event, beliefs, now=10.0)
-    assert not acted
-    assert b.conf == pytest.approx(1.0)
+    b = belief("L")
+    assert EW.process_event(alarm("L", triggered=False), {"o": b}, now=10.0) is False
+    assert b.conf == 1.0 and b.t == 0.0
 
 
-def test_non_zone_disturbed_event_ignored():
-    b = make_belief("L", conf=1.0)
-    beliefs = {"bottle_blue": b}
-    event = {"type": "event", "event": "episode_start", "t": 0.0}
-    acted = EW.process_event(event, beliefs, now=0.0)
-    assert not acted
+def test_other_event_types_ignored():
+    b = belief("L")
+    assert EW.process_event({"type": "event", "event": "episode_start", "t": 0}, {"o": b}, 0.0) is False
+    assert EW.process_event({"type": "observation"}, {"o": b}, 0.0) is False
+    assert b.conf == 1.0
 
 
-# ---------------------------------------------------------------------------
-# Confidence update correctness
-# ---------------------------------------------------------------------------
-
-def test_disturb_multiplier_applied():
-    """After a threshold-crossing alarm, conf should be multiplied by DISTURB=0.35."""
-    b = make_belief("L", conf=1.0)
-    beliefs = {"bottle_blue": b}
-    # Different zone → p_moved=0.85 → threshold met → disturbed() called
-    EW.process_event(make_event(zone="R"), beliefs, now=10.0)
-    # disturbed() on zone != b.place means b.conf is unchanged by the *disturbed* code path
-    # but if zone == b.place it would multiply by DISTURB
-    # Here zone="R" != b.place="L", so RB.disturbed only ticks time but doesn't apply DISTURB
-    # The confidence drop comes from tick()'s time decay (hidden=True) from t=0→10
-    # With HALF_LIFE_S=60: 0.5^(10/60) ≈ 0.891
-    assert b.conf == pytest.approx(0.5 ** (10 / RB.HALF_LIFE_S), abs=1e-4)
+def test_repeated_alarms_compound():
+    b = belief("L", conf=1.0, t=0.0)
+    EW.process_event(alarm("L", 0.0), {"o": b}, now=0.0)
+    EW.process_event(alarm("L", 0.0), {"o": b}, now=0.0)
+    assert b.conf == pytest.approx(RB.DISTURB ** 2)
 
 
-def test_disturb_multiplier_on_same_zone_second_alarm():
-    """Second same-zone alarm: after threshold met, conf × DISTURB."""
-    b = make_belief("L", conf=1.0)
-    beliefs = {"bottle_blue": b}
-    counts: dict = {}
-    EW.process_event(make_event(zone="L", t=0.0), beliefs, now=0.0, alarm_counts=counts)
-    conf_before = b.conf   # first alarm ignored, conf unchanged
-    EW.process_event(make_event(zone="L", t=0.0), beliefs, now=0.0, alarm_counts=counts)
-    # disturbed(b, "L", 0.0) → tick (no time elapsed) then b.conf *= DISTURB
-    assert b.conf == pytest.approx(conf_before * RB.DISTURB, abs=1e-6)
+def test_every_belief_at_that_place_is_cut():
+    a = belief("R", 0.9, name="cup_red")
+    c = belief("L", 0.8, name="box_green")
+    EW.process_event(alarm("R", 0.0), {"cup_red": a, "box_green": c}, now=0.0)
+    assert a.conf == pytest.approx(0.9 * RB.DISTURB)
+    assert c.conf == pytest.approx(0.8)
 
 
-# ---------------------------------------------------------------------------
-# Multiple objects in beliefs dict
-# ---------------------------------------------------------------------------
+def test_plan_worked_example_order_flips_after_alarm():
+    """Plan 1.1: hidden 25 s -> conf 0.75; sensor fires -> 0.2625; P(L)/P(R) = 0.42/0.58."""
+    b = belief("L", conf=0.75, t=25.0)
+    assert RB.search_order(b, False)[0] == "L"
+    EW.process_event(alarm("L", 25.0), {"o": b}, now=25.0)
+    assert b.conf == pytest.approx(0.2625, abs=1e-4)
+    p = RB.place_probs(b, False)
+    assert p["L"] == pytest.approx(0.42, abs=0.01) and p["R"] == pytest.approx(0.58, abs=0.01)
+    assert RB.search_order(b, False)[0] == "R"
 
-def test_all_objects_updated():
-    """All objects in the beliefs dict get the event applied."""
-    b1 = make_belief("R", conf=0.9)
-    b2 = RB.Belief(name="cup_red", place="R", conf=0.8, t=0.0)
-    beliefs = {"bottle_blue": b1, "cup_red": b2}
-    counts: dict = {}
-    # Zone R, different from b.place="R"? No — same zone, so first alarm ignored for both
-    EW.process_event(make_event(zone="R", t=0.0), beliefs, now=0.0, alarm_counts=counts)
-    assert b1.conf == pytest.approx(0.9, abs=1e-6)
-    assert b2.conf == pytest.approx(0.8, abs=1e-6)
-    # Second alarm for same zone → both should be updated
-    EW.process_event(make_event(zone="R", t=0.0), beliefs, now=0.0, alarm_counts=counts)
-    assert b1.conf < 0.9
-    assert b2.conf < 0.8
+
+def test_accepts_c_log_schema_and_live_obs_events():
+    log = {"type": "event", "episode_id": "S3-seed80100-cup_red", "t": 12.4,
+           "kind": "zone_disturbed", "zone": "L", "sensor_triggered": True,
+           "is_false_alarm": False}
+    live = {"kind": "zone_disturbed", "zone": "L", "t": 12.4}
+    for ev in (log, live):
+        b = belief("L", 1.0, 12.4)
+        assert EW.process_event(ev, {"o": b}, now=12.4) is True
+        assert b.conf == pytest.approx(RB.DISTURB)

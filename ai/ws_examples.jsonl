@@ -1,0 +1,59 @@
+{"episode": "S2_calm", "type": "observation", "t": 0.0, "front_image": "mock://front/0.jpg", "wrist_image": null, "state": {"x": 0, "y": 0, "z": 0.2, "gripper": 1}, "sensor_event": null}
+{"episode": "S2_calm", "type": "belief", "object": "bottle_blue", "place": "L", "confidence": 1.0, "last_seen_t": 0.0, "status": "unknown"}
+{"episode": "S2_calm", "type": "observation", "t": 3.0, "front_image": "mock://front/blocked.jpg", "wrist_image": null, "state": {"x": 0, "y": 0, "z": 0.2, "gripper": 1}, "sensor_event": null}
+{"episode": "S2_calm", "type": "belief", "object": "bottle_blue", "place": "L", "confidence": 0.966, "last_seen_t": 3.0, "status": "unknown"}
+{"episode": "S2_calm", "type": "observation", "t": 6.0, "front_image": "mock://front/blocked.jpg", "wrist_image": null, "state": {"x": 0, "y": 0, "z": 0.2, "gripper": 1}, "sensor_event": null}
+{"episode": "S2_calm", "type": "belief", "object": "bottle_blue", "place": "L", "confidence": 0.933, "last_seen_t": 6.0, "status": "unknown"}
+{"episode": "S2_calm", "type": "observation", "t": 9.0, "front_image": "mock://front/blocked.jpg", "wrist_image": null, "state": {"x": 0, "y": 0, "z": 0.2, "gripper": 1}, "sensor_event": null}
+{"episode": "S2_calm", "type": "belief", "object": "bottle_blue", "place": "L", "confidence": 0.901, "last_seen_t": 9.0, "status": "unknown"}
+{"episode": "S2_calm", "type": "observation", "t": 12.0, "front_image": "mock://front/blocked.jpg", "wrist_image": null, "state": {"x": 0, "y": 0, "z": 0.2, "gripper": 1}, "sensor_event": null}
+{"episode": "S2_calm", "type": "belief", "object": "bottle_blue", "place": "L", "confidence": 0.871, "last_seen_t": 12.0, "status": "unknown"}
+{"episode": "S2_calm", "type": "observation", "t": 15.0, "front_image": "mock://front/blocked.jpg", "wrist_image": null, "state": {"x": 0, "y": 0, "z": 0.2, "gripper": 1}, "sensor_event": null}
+{"episode": "S2_calm", "type": "belief", "object": "bottle_blue", "place": "L", "confidence": 0.841, "last_seen_t": 15.0, "status": "unknown"}
+{"episode": "S2_calm", "type": "observation", "t": 18.0, "front_image": "mock://front/blocked.jpg", "wrist_image": null, "state": {"x": 0, "y": 0, "z": 0.2, "gripper": 1}, "sensor_event": null}
+{"episode": "S2_calm", "type": "belief", "object": "bottle_blue", "place": "L", "confidence": 0.812, "last_seen_t": 18.0, "status": "unknown"}
+{"episode": "S2_calm", "type": "observation", "t": 21.0, "front_image": "mock://front/blocked.jpg", "wrist_image": null, "state": {"x": 0, "y": 0, "z": 0.2, "gripper": 1}, "sensor_event": null}
+{"episode": "S2_calm", "type": "belief", "object": "bottle_blue", "place": "L", "confidence": 0.785, "last_seen_t": 21.0, "status": "unknown"}
+{"episode": "S2_calm", "type": "observation", "t": 24.0, "front_image": "mock://front/blocked.jpg", "wrist_image": null, "state": {"x": 0, "y": 0, "z": 0.2, "gripper": 1}, "sensor_event": null}
+{"episode": "S2_calm", "type": "belief", "object": "bottle_blue", "place": "L", "confidence": 0.758, "last_seen_t": 24.0, "status": "unknown"}
+{"episode": "S2_calm", "type": "observation", "t": 27.0, "front_image": "mock://front/blocked.jpg", "wrist_image": null, "state": {"x": 0, "y": 0, "z": 0.2, "gripper": 1}, "sensor_event": null}
+{"episode": "S2_calm", "type": "belief", "object": "bottle_blue", "place": "L", "confidence": 0.732, "last_seen_t": 27.0, "status": "unknown"}
+{"episode": "S2_calm", "type": "observation", "t": 30.0, "front_image": "mock://front/blocked.jpg", "wrist_image": null, "state": {"x": 0, "y": 0, "z": 0.2, "gripper": 1}, "sensor_event": null}
+{"episode": "S2_calm", "type": "belief", "object": "bottle_blue", "place": "L", "confidence": 0.707, "last_seen_t": 30.0, "status": "unknown"}
+{"episode": "S2_calm", "type": "decision", "engine": "rule", "action": "look", "target": "L", "command": "fly the wrist camera over the left screen", "why": "Last seen behind the left screen with 71% confidence; the left screen is the best place to look first (83%).", "latency_ms": 0, "offline": false, "fallback_reason": "", "model": "", "agree_with_rule": null}
+{"episode": "S2_calm", "type": "action_result", "skill": "look", "ok": true, "duration_s": 8.0, "gripper_state_at_end": null}
+{"episode": "S2_calm", "type": "belief", "object": "bottle_blue", "place": "L", "confidence": 1.0, "last_seen_t": 38.0, "status": "visible"}
+{"episode": "S2_calm", "type": "decision", "engine": "rule", "action": "pick", "target": "bottle_blue", "command": "pick up the blue bottle and place it in the tray", "why": "The blue bottle is visible, so I will pick it up.", "latency_ms": 0, "offline": false, "fallback_reason": "", "model": "", "agree_with_rule": null}
+{"episode": "S2_calm", "type": "action_result", "skill": "pick", "ok": true, "duration_s": 6.0, "gripper_state_at_end": 0.4}
+{"episode": "S2_calm", "type": "episode_end", "success": true, "total_time_s": 44.0, "looks": 1, "llm_calls": 0, "ground_truth_place": "L"}
+{"episode": "S3_moved_sensor_grasp_fail", "type": "observation", "t": 0.0, "front_image": "mock://front/0.jpg", "wrist_image": null, "state": {"x": 0, "y": 0, "z": 0.2, "gripper": 1}, "sensor_event": null}
+{"episode": "S3_moved_sensor_grasp_fail", "type": "belief", "object": "bottle_blue", "place": "L", "confidence": 1.0, "last_seen_t": 0.0, "status": "unknown"}
+{"episode": "S3_moved_sensor_grasp_fail", "type": "observation", "t": 3.0, "front_image": "mock://front/blocked.jpg", "wrist_image": null, "state": {"x": 0, "y": 0, "z": 0.2, "gripper": 1}, "sensor_event": {"place": "L", "fired": true}}
+{"episode": "S3_moved_sensor_grasp_fail", "type": "belief", "object": "bottle_blue", "place": "L", "confidence": 0.338, "last_seen_t": 3.0, "status": "stale"}
+{"episode": "S3_moved_sensor_grasp_fail", "type": "observation", "t": 6.0, "front_image": "mock://front/blocked.jpg", "wrist_image": null, "state": {"x": 0, "y": 0, "z": 0.2, "gripper": 1}, "sensor_event": null}
+{"episode": "S3_moved_sensor_grasp_fail", "type": "belief", "object": "bottle_blue", "place": "L", "confidence": 0.327, "last_seen_t": 6.0, "status": "stale"}
+{"episode": "S3_moved_sensor_grasp_fail", "type": "observation", "t": 9.0, "front_image": "mock://front/blocked.jpg", "wrist_image": null, "state": {"x": 0, "y": 0, "z": 0.2, "gripper": 1}, "sensor_event": null}
+{"episode": "S3_moved_sensor_grasp_fail", "type": "belief", "object": "bottle_blue", "place": "L", "confidence": 0.315, "last_seen_t": 9.0, "status": "stale"}
+{"episode": "S3_moved_sensor_grasp_fail", "type": "observation", "t": 12.0, "front_image": "mock://front/blocked.jpg", "wrist_image": null, "state": {"x": 0, "y": 0, "z": 0.2, "gripper": 1}, "sensor_event": null}
+{"episode": "S3_moved_sensor_grasp_fail", "type": "belief", "object": "bottle_blue", "place": "L", "confidence": 0.305, "last_seen_t": 12.0, "status": "stale"}
+{"episode": "S3_moved_sensor_grasp_fail", "type": "observation", "t": 15.0, "front_image": "mock://front/blocked.jpg", "wrist_image": null, "state": {"x": 0, "y": 0, "z": 0.2, "gripper": 1}, "sensor_event": null}
+{"episode": "S3_moved_sensor_grasp_fail", "type": "belief", "object": "bottle_blue", "place": "L", "confidence": 0.294, "last_seen_t": 15.0, "status": "stale"}
+{"episode": "S3_moved_sensor_grasp_fail", "type": "observation", "t": 18.0, "front_image": "mock://front/blocked.jpg", "wrist_image": null, "state": {"x": 0, "y": 0, "z": 0.2, "gripper": 1}, "sensor_event": null}
+{"episode": "S3_moved_sensor_grasp_fail", "type": "belief", "object": "bottle_blue", "place": "L", "confidence": 0.284, "last_seen_t": 18.0, "status": "stale"}
+{"episode": "S3_moved_sensor_grasp_fail", "type": "observation", "t": 21.0, "front_image": "mock://front/blocked.jpg", "wrist_image": null, "state": {"x": 0, "y": 0, "z": 0.2, "gripper": 1}, "sensor_event": null}
+{"episode": "S3_moved_sensor_grasp_fail", "type": "belief", "object": "bottle_blue", "place": "L", "confidence": 0.275, "last_seen_t": 21.0, "status": "stale"}
+{"episode": "S3_moved_sensor_grasp_fail", "type": "observation", "t": 24.0, "front_image": "mock://front/blocked.jpg", "wrist_image": null, "state": {"x": 0, "y": 0, "z": 0.2, "gripper": 1}, "sensor_event": null}
+{"episode": "S3_moved_sensor_grasp_fail", "type": "belief", "object": "bottle_blue", "place": "L", "confidence": 0.265, "last_seen_t": 24.0, "status": "stale"}
+{"episode": "S3_moved_sensor_grasp_fail", "type": "observation", "t": 27.0, "front_image": "mock://front/blocked.jpg", "wrist_image": null, "state": {"x": 0, "y": 0, "z": 0.2, "gripper": 1}, "sensor_event": null}
+{"episode": "S3_moved_sensor_grasp_fail", "type": "belief", "object": "bottle_blue", "place": "L", "confidence": 0.256, "last_seen_t": 27.0, "status": "stale"}
+{"episode": "S3_moved_sensor_grasp_fail", "type": "observation", "t": 30.0, "front_image": "mock://front/blocked.jpg", "wrist_image": null, "state": {"x": 0, "y": 0, "z": 0.2, "gripper": 1}, "sensor_event": null}
+{"episode": "S3_moved_sensor_grasp_fail", "type": "belief", "object": "bottle_blue", "place": "L", "confidence": 0.247, "last_seen_t": 30.0, "status": "stale"}
+{"episode": "S3_moved_sensor_grasp_fail", "type": "decision", "engine": "rule", "action": "look", "target": "R", "command": "fly the wrist camera over the right screen", "why": "The left screen was disturbed 27 s ago, so memory is shaky; the right screen is more likely (60%) and I will check it first.", "latency_ms": 0, "offline": false, "fallback_reason": "", "model": "", "agree_with_rule": null}
+{"episode": "S3_moved_sensor_grasp_fail", "type": "action_result", "skill": "look", "ok": true, "duration_s": 8.0, "gripper_state_at_end": null}
+{"episode": "S3_moved_sensor_grasp_fail", "type": "belief", "object": "bottle_blue", "place": "R", "confidence": 1.0, "last_seen_t": 38.0, "status": "visible"}
+{"episode": "S3_moved_sensor_grasp_fail", "type": "decision", "engine": "rule", "action": "pick", "target": "bottle_blue", "command": "pick up the blue bottle and place it in the tray", "why": "The blue bottle is visible, so I will pick it up.", "latency_ms": 0, "offline": false, "fallback_reason": "", "model": "", "agree_with_rule": null}
+{"episode": "S3_moved_sensor_grasp_fail", "type": "action_result", "skill": "pick", "ok": false, "duration_s": 6.0, "gripper_state_at_end": 0.0}
+{"episode": "S3_moved_sensor_grasp_fail", "type": "belief", "object": "bottle_blue", "place": "R", "confidence": 0.05, "last_seen_t": 38.0, "status": "stale"}
+{"episode": "S3_moved_sensor_grasp_fail", "type": "decision", "engine": "rule", "action": "pick", "target": "bottle_blue", "command": "pick up the blue bottle and place it in the tray", "why": "Grasp failed; re-approaching the visible object.", "latency_ms": 0, "offline": false, "fallback_reason": "", "model": "", "agree_with_rule": null}
+{"episode": "S3_moved_sensor_grasp_fail", "type": "action_result", "skill": "pick", "ok": true, "duration_s": 6.0, "gripper_state_at_end": 0.4}
+{"episode": "S3_moved_sensor_grasp_fail", "type": "episode_end", "success": true, "total_time_s": 50.0, "looks": 1, "llm_calls": 0, "ground_truth_place": "R"}

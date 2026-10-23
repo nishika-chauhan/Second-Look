@@ -78,7 +78,7 @@ def test_symmetry():
 def test_magnitude_roughly_correct():
     """224 px at FOV=90°, height=0.30 m → half-width ≈ 0.30 m."""
     x_edge, _ = P.px_to_table(223, 112)
-    assert 0.25 < x_edge < 0.35, f"edge pixel should be ~0.30 m from centre, got {x_edge:.3f}"
+    assert 0.21 < x_edge < 0.25, f"edge pixel should be ~0.23 m from centre (0.40 m, fovy 60), got {x_edge:.3f}"
 
 
 # ---------------------------------------------------------------------------
