@@ -17,3 +17,12 @@ node_modules/
 wandb/
 .pytest_cache/
 .vscode/
+
+# Local model checkpoints and evaluation outputs
+models/
+*.engine
+*.onnx
+*_results.csv
+smolvla_*.csv
+expert_*.csv
+rollout_results.csv

@@ -29,6 +29,9 @@ Server -> client message types (plan Part 2.2):
 
 from __future__ import annotations
 
+import os
+import httpx
+from fastapi import HTTPException
 import asyncio
 import json
 import os
@@ -271,6 +274,34 @@ async def root():
 @app.get("/health")
 async def health():
     return {"ok": True, "allowed_origins": ORIGINS}
+
+@app.post("/simulator/command")
+async def simulator_command(payload: dict):
+    simulator_url = os.getenv(
+        "SIMULATOR_URL",
+        "http://127.0.0.1:8001",
+    ).rstrip("/")
+
+    try:
+        async with httpx.AsyncClient(timeout=120.0) as client:
+            response = await client.post(
+                f"{simulator_url}/command",
+                json=payload,
+            )
+            response.raise_for_status()
+            return response.json()
+
+    except httpx.HTTPStatusError as exc:
+        raise HTTPException(
+            status_code=exc.response.status_code,
+            detail=exc.response.text,
+        ) from exc
+
+    except (httpx.RequestError, httpx.TimeoutException) as exc:
+        raise HTTPException(
+            status_code=503,
+            detail="Simulator service is unavailable or timed out.",
+        ) from exc
 
 
 @app.websocket("/ws")
