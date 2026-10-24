@@ -1,5 +1,11 @@
-{"type":"observation","episode_id":"S3-seed7-ours","t":12.4,"detections":[{"label":"cup_red","xy":[-0.28,0.10],"px":[168,183,202,229],"score":0.98}],"occluders":[{"id":"screen","xy":[0.0,-0.05]}],"events":[{"kind":"zone_disturbed","zone":"behind_screen","t":11.9}]}
-{"type":"belief","episode_id":"S3-seed7-ours","t":12.4,"objects":[{"name":"bottle_blue","xy":[0.0,0.12],"conf":0.78,"last_seen_t":1.0,"hidden_by":"screen","status":"stale"},{"name":"cup_red","xy":[-0.28,0.10],"conf":1.0,"last_seen_t":12.4,"hidden_by":null,"status":"visible"}]}
-{"type":"decision","episode_id":"S3-seed7-ours","t":12.5,"engine":"llm","action":"relook","target":"bottle_blue","command":"look over the screen","why":"The bottle was hidden for 11 s and that area was disturbed.","latency_ms":840}
-{"type":"action_result","episode_id":"S3-seed7-ours","t":19.8,"skill":"peek","ok":true,"duration_s":6.9}
-{"type":"episode_end","episode_id":"S3-seed7-ours","success":true,"total_time_s":31.2,"relooks":1,"llm_calls":2,"ground_truth_xy":[0.18,0.10]}
+{"type": "observation", "t": 0.0, "front_image": "mock://front/0.jpg", "wrist_image": null, "state": {"x": 0, "y": 0, "z": 0.2, "gripper": 1}, "sensor_event": null}
+{"type": "belief", "t": 0.0, "object": "bottle_blue", "place": "L", "confidence": 1.0, "last_seen_t": 0.0, "status": "unknown"}
+{"type": "observation", "t": 3.0, "front_image": "mock://front/blocked.jpg", "wrist_image": null, "state": {"x": 0, "y": 0, "z": 0.2, "gripper": 1}, "sensor_event": {"place": "L", "fired": true}}
+{"type": "belief", "t": 3.0, "object": "bottle_blue", "place": "L", "confidence": 0.338, "last_seen_t": 3.0, "status": "stale"}
+{"type": "decision", "engine": "rule", "action": "look", "target": "R", "command": "fly the wrist camera over the right screen", "why": "The left screen was disturbed 27 s ago, so memory is shaky; the right screen is more likely (60%) and I will check it first.", "latency_ms": 0, "offline": false, "fallback_reason": "", "model": "", "agree_with_rule": null}
+{"type": "decision", "engine": "rule", "action": "pick", "target": "bottle_blue", "command": "pick up the blue bottle and place it in the tray", "why": "The blue bottle is visible, so I will pick it up.", "latency_ms": 0, "offline": false, "fallback_reason": "", "model": "", "agree_with_rule": null}
+{"type": "action_result", "skill": "look", "ok": true, "duration_s": 8.0, "gripper_state_at_end": null}
+{"type": "action_result", "skill": "pick", "ok": false, "duration_s": 6.0, "gripper_state_at_end": 0.0}
+{"type": "episode_end", "success": true, "total_time_s": 50.0, "looks": 1, "llm_calls": 0, "ground_truth_place": "R"}
+{"type": "error", "why": "unknown cmd 'dance'"}
+{"type": "reset_ack"}
