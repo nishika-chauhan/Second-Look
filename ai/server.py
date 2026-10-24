@@ -317,6 +317,9 @@ async def ws_endpoint(websocket: WebSocket):
                 if engine not in ("rule", "auto", "llm", "nemotron"):
                     await send({"type": "error", "why": f"unknown engine {engine!r}"})
                     continue
+                if str(cmd.get("true_place", "L")) not in RB.HIDING:
+                    await send({"type": "error", "why": f"unknown true_place {cmd.get('true_place')!r}; use one of {RB.HIDING}"})
+                    continue
                 cancel_current()
                 ep = MockEpisode(
                     send=send,

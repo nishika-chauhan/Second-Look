@@ -1,0 +1,251 @@
+condition,success,total_time_s,looks
+P0 Trust memory,1,14.0,1
+P1 Sweep,1,14.0,1
+P2 Timer,1,14.0,1
+P3 Ours (rule),1,14.0,1
+P0 Trust memory,1,14.0,1
+P1 Sweep,1,22.0,2
+P2 Timer,1,14.0,1
+P3 Ours (rule),1,14.0,1
+P0 Trust memory,1,14.0,1
+P1 Sweep,1,14.0,1
+P2 Timer,1,14.0,1
+P3 Ours (rule),1,14.0,1
+P0 Trust memory,1,14.0,1
+P1 Sweep,1,22.0,2
+P2 Timer,1,22.0,2
+P3 Ours (rule),1,14.0,1
+P0 Trust memory,1,14.0,1
+P1 Sweep,1,14.0,1
+P2 Timer,1,14.0,1
+P3 Ours (rule),1,14.0,1
+P0 Trust memory,1,14.0,1
+P1 Sweep,1,22.0,2
+P2 Timer,1,14.0,1
+P3 Ours (rule),1,14.0,1
+P0 Trust memory,1,14.0,1
+P1 Sweep,1,14.0,1
+P2 Timer,1,14.0,1
+P3 Ours (rule),1,14.0,1
+P0 Trust memory,1,14.0,1
+P1 Sweep,1,22.0,2
+P2 Timer,1,14.0,1
+P3 Ours (rule),1,14.0,1
+P0 Trust memory,1,14.0,1
+P1 Sweep,1,14.0,1
+P2 Timer,1,14.0,1
+P3 Ours (rule),1,14.0,1
+P0 Trust memory,1,14.0,1
+P1 Sweep,1,22.0,2
+P2 Timer,1,22.0,2
+P3 Ours (rule),1,14.0,1
+P0 Trust memory,1,14.0,1
+P1 Sweep,1,14.0,1
+P2 Timer,1,14.0,1
+P3 Ours (rule),1,14.0,1
+P0 Trust memory,1,14.0,1
+P1 Sweep,1,22.0,2
+P2 Timer,1,14.0,1
+P3 Ours (rule),1,14.0,1
+P0 Trust memory,1,14.0,1
+P1 Sweep,1,14.0,1
+P2 Timer,1,14.0,1
+P3 Ours (rule),1,14.0,1
+P0 Trust memory,1,14.0,1
+P1 Sweep,1,22.0,2
+P2 Timer,1,22.0,2
+P3 Ours (rule),1,14.0,1
+P0 Trust memory,1,14.0,1
+P1 Sweep,1,14.0,1
+P2 Timer,1,14.0,1
+P3 Ours (rule),1,14.0,1
+P0 Trust memory,1,14.0,1
+P1 Sweep,1,22.0,2
+P2 Timer,1,14.0,1
+P3 Ours (rule),1,14.0,1
+P0 Trust memory,1,14.0,1
+P1 Sweep,1,14.0,1
+P2 Timer,1,14.0,1
+P3 Ours (rule),1,14.0,1
+P0 Trust memory,1,14.0,1
+P1 Sweep,1,22.0,2
+P2 Timer,1,14.0,1
+P3 Ours (rule),1,14.0,1
+P0 Trust memory,1,14.0,1
+P1 Sweep,1,14.0,1
+P2 Timer,1,14.0,1
+P3 Ours (rule),1,14.0,1
+P0 Trust memory,1,14.0,1
+P1 Sweep,1,22.0,2
+P2 Timer,1,22.0,2
+P3 Ours (rule),1,14.0,1
+P0 Trust memory,1,14.0,1
+P1 Sweep,1,14.0,1
+P2 Timer,1,14.0,1
+P3 Ours (rule),1,14.0,1
+P0 Trust memory,0,8.0,1
+P1 Sweep,1,14.0,1
+P2 Timer,1,22.0,2
+P3 Ours (rule),1,14.0,1
+P0 Trust memory,0,8.0,1
+P1 Sweep,1,22.0,2
+P2 Timer,1,22.0,2
+P3 Ours (rule),1,14.0,1
+P0 Trust memory,1,14.0,1
+P1 Sweep,1,22.0,2
+P2 Timer,1,14.0,1
+P3 Ours (rule),1,14.0,1
+P0 Trust memory,0,8.0,1
+P1 Sweep,1,22.0,2
+P2 Timer,1,22.0,2
+P3 Ours (rule),1,14.0,1
+P0 Trust memory,1,14.0,1
+P1 Sweep,1,22.0,2
+P2 Timer,1,22.0,2
+P3 Ours (rule),1,22.0,2
+P0 Trust memory,0,8.0,1
+P1 Sweep,1,22.0,2
+P2 Timer,1,22.0,2
+P3 Ours (rule),1,22.0,2
+P0 Trust memory,1,14.0,1
+P1 Sweep,1,22.0,2
+P2 Timer,1,14.0,1
+P3 Ours (rule),1,22.0,2
+P0 Trust memory,0,8.0,1
+P1 Sweep,1,22.0,2
+P2 Timer,1,22.0,2
+P3 Ours (rule),1,14.0,1
+P0 Trust memory,1,14.0,1
+P1 Sweep,1,22.0,2
+P2 Timer,1,14.0,1
+P3 Ours (rule),1,14.0,1
+P0 Trust memory,1,14.0,1
+P1 Sweep,1,14.0,1
+P2 Timer,1,14.0,1
+P3 Ours (rule),1,14.0,1
+P0 Trust memory,0,8.0,1
+P1 Sweep,1,14.0,1
+P2 Timer,1,14.0,1
+P3 Ours (rule),1,14.0,1
+P0 Trust memory,0,8.0,1
+P1 Sweep,1,22.0,2
+P2 Timer,1,22.0,2
+P3 Ours (rule),1,22.0,2
+P0 Trust memory,0,8.0,1
+P1 Sweep,1,14.0,1
+P2 Timer,1,22.0,2
+P3 Ours (rule),1,14.0,1
+P0 Trust memory,1,14.0,1
+P1 Sweep,1,14.0,1
+P2 Timer,1,14.0,1
+P3 Ours (rule),1,22.0,2
+P0 Trust memory,1,14.0,1
+P1 Sweep,1,22.0,2
+P2 Timer,1,14.0,1
+P3 Ours (rule),1,14.0,1
+P0 Trust memory,1,14.0,1
+P1 Sweep,1,14.0,1
+P2 Timer,1,14.0,1
+P3 Ours (rule),1,14.0,1
+P0 Trust memory,0,8.0,1
+P1 Sweep,1,14.0,1
+P2 Timer,1,14.0,1
+P3 Ours (rule),1,14.0,1
+P0 Trust memory,1,14.0,1
+P1 Sweep,1,14.0,1
+P2 Timer,1,14.0,1
+P3 Ours (rule),1,14.0,1
+P0 Trust memory,1,14.0,1
+P1 Sweep,1,22.0,2
+P2 Timer,1,14.0,1
+P3 Ours (rule),1,14.0,1
+P0 Trust memory,1,14.0,1
+P1 Sweep,1,14.0,1
+P2 Timer,1,14.0,1
+P3 Ours (rule),1,14.0,1
+P0 Trust memory,1,14.0,1
+P1 Sweep,1,22.0,2
+P2 Timer,1,14.0,1
+P3 Ours (rule),1,14.0,1
+P0 Trust memory,0,8.0,1
+P1 Sweep,1,22.0,2
+P2 Timer,1,22.0,2
+P3 Ours (rule),1,14.0,1
+P0 Trust memory,0,8.0,1
+P1 Sweep,1,14.0,1
+P2 Timer,1,14.0,1
+P3 Ours (rule),1,14.0,1
+P0 Trust memory,1,14.0,1
+P1 Sweep,1,14.0,1
+P2 Timer,1,14.0,1
+P3 Ours (rule),1,14.0,1
+P0 Trust memory,1,14.0,1
+P1 Sweep,1,22.0,2
+P2 Timer,1,14.0,1
+P3 Ours (rule),1,14.0,1
+P0 Trust memory,0,8.0,1
+P1 Sweep,1,22.0,2
+P2 Timer,1,22.0,2
+P3 Ours (rule),1,14.0,1
+P0 Trust memory,0,8.0,1
+P1 Sweep,1,14.0,1
+P2 Timer,1,22.0,2
+P3 Ours (rule),1,22.0,2
+P0 Trust memory,1,14.0,1
+P1 Sweep,1,14.0,1
+P2 Timer,1,14.0,1
+P3 Ours (rule),1,14.0,1
+P0 Trust memory,1,14.0,1
+P1 Sweep,1,22.0,2
+P2 Timer,1,22.0,2
+P3 Ours (rule),1,14.0,1
+P5 Ours + Nemotron,1,14.0,1
+P5 Ours + Nemotron,1,14.0,1
+P5 Ours + Nemotron,1,14.0,1
+P5 Ours + Nemotron,1,14.0,1
+P5 Ours + Nemotron,1,14.0,1
+P5 Ours + Nemotron,1,14.0,1
+P5 Ours + Nemotron,1,14.0,1
+P5 Ours + Nemotron,1,14.0,1
+P5 Ours + Nemotron,1,14.0,1
+P5 Ours + Nemotron,1,14.0,1
+P5 Ours + Nemotron,1,14.0,1
+P5 Ours + Nemotron,1,14.0,1
+P5 Ours + Nemotron,1,14.0,1
+P5 Ours + Nemotron,1,14.0,1
+P5 Ours + Nemotron,1,14.0,1
+P5 Ours + Nemotron,1,14.0,1
+P5 Ours + Nemotron,1,14.0,1
+P5 Ours + Nemotron,1,14.0,1
+P5 Ours + Nemotron,1,14.0,1
+P5 Ours + Nemotron,1,14.0,1
+P5 Ours + Nemotron,1,14.0,1
+P5 Ours + Nemotron,1,14.0,1
+P5 Ours + Nemotron,1,14.0,1
+P5 Ours + Nemotron,1,14.0,1
+P5 Ours + Nemotron,1,14.0,1
+P5 Ours + Nemotron,1,22.0,2
+P5 Ours + Nemotron,1,22.0,2
+P5 Ours + Nemotron,1,22.0,2
+P5 Ours + Nemotron,1,14.0,1
+P5 Ours + Nemotron,1,14.0,1
+P5 Ours + Nemotron,1,14.0,1
+P5 Ours + Nemotron,1,14.0,1
+P5 Ours + Nemotron,1,22.0,2
+P5 Ours + Nemotron,1,14.0,1
+P5 Ours + Nemotron,1,22.0,2
+P5 Ours + Nemotron,1,14.0,1
+P5 Ours + Nemotron,1,14.0,1
+P5 Ours + Nemotron,1,14.0,1
+P5 Ours + Nemotron,1,14.0,1
+P5 Ours + Nemotron,1,14.0,1
+P5 Ours + Nemotron,1,14.0,1
+P5 Ours + Nemotron,1,14.0,1
+P5 Ours + Nemotron,1,14.0,1
+P5 Ours + Nemotron,1,14.0,1
+P5 Ours + Nemotron,1,14.0,1
+P5 Ours + Nemotron,1,14.0,1
+P5 Ours + Nemotron,1,14.0,1
+P5 Ours + Nemotron,1,22.0,2
+P5 Ours + Nemotron,1,14.0,1
+P5 Ours + Nemotron,1,14.0,1

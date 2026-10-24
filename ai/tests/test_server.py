@@ -172,3 +172,12 @@ def test_belief_messages_carry_sim_time():
     assert all("t" in b for b in beliefs)
     ts = [b["t"] for b in beliefs]
     assert ts == sorted(ts) and ts[0] == 0.0 and ts[-1] > 60
+
+
+def test_unknown_true_place_is_a_clean_error_not_a_crash():
+    with client.websocket_connect("/ws") as ws:
+        ws.send_json({**FAST, "true_place": "C"})
+        m = ws.receive_json()
+        assert m["type"] == "error" and "true_place" in m["why"]
+        ws.send_json({**FAST, "true_place": "L"})              # connection still usable
+        assert collect(ws)[-1]["success"] is True

@@ -186,7 +186,16 @@ def main():
         sel = [r for r in rows if r["policy"] == "P3_rule" and pred(r)]
         if sel:
             print(f"  {name:40s} n={len(sel):2d}  mean looks {sum(r['looks'] for r in sel)/len(sel):.2f}  success {sum(r['success'] for r in sel)}/{len(sel)}")
-    print(f"\nper-episode rows -> {a.out}")
+    dash = os.path.splitext(a.out)[0] + "_dashboard.csv"
+    labels = {"P0_trust_memory": "P0 Trust memory", "P1_sweep": "P1 Sweep", "P2_timer": "P2 Timer",
+              "P3_rule": "P3 Ours (rule)", "P5_nemotron": "P5 Ours + Nemotron"}
+    with open(dash, "w", newline="") as fh:
+        w = csv.writer(fh)
+        w.writerow(["condition", "success", "total_time_s", "looks"])
+        for r in rows:
+            w.writerow([labels.get(r["policy"], r["policy"]), r["success"], r["time_to_finish_s"], r["looks"]])
+    print(f"\nper-episode rows -> {os.path.abspath(a.out)}")
+    print(f"dashboard Results-tab CSV -> {os.path.abspath(dash)}")
 
 
 if __name__ == "__main__":
