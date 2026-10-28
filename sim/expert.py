@@ -7,7 +7,10 @@ teach the VLA to guess things it cannot see.
 """
 import numpy as np
 
-from world import MAX_STEP, REST_Z, TRAY_XY, Z_SAFE
+try:
+    from sim.world import MAX_STEP, REST_Z, TRAY_XY, Z_SAFE
+except ImportError:
+    from world import MAX_STEP, REST_Z, TRAY_XY, Z_SAFE
 
 TASK_TEXT = {
     "cup_red": "pick up the red cup and place it in the tray",

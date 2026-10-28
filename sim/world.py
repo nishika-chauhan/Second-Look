@@ -148,7 +148,7 @@ class SecondLookEnv:
         self.d.ctrl[:] = [xyz[0], xyz[1], xyz[2] - Z_HOME_JOINT]
         self.grip = g
 
-    def reset(self, seed=0, target="cup_red", start="home", randomize=None, third_occluder=None):
+    def reset(self, seed=0, target="cup_red", start="home", randomize=None, third_occluder=None, hidden_place=None):
         """start: 'home' (target visible from the front) | 'look_L' | 'look_R' | 'look_M' (target hidden behind that
         screen, robot already hovering above it - like after a 'look')."""
         if randomize is None:
@@ -220,8 +220,11 @@ class SecondLookEnv:
         order = [target] + [n for n in OBJECTS if n != target]
         for n in order:
             if n == target:
-                hidden = start.startswith("look")
-                region = (start.split("_")[1] if start.startswith("look_") else None)
+                if hidden_place in ("L", "R", "M"):
+                    hidden, region = True, hidden_place
+                else:
+                    hidden = start.startswith("look")
+                    region = (start.split("_")[1] if start.startswith("look_") else None)
             else:
                 hidden, region = bool(rng.random() < 0.4), None
             xy = self._sample_xy(rng, hidden, region, placed)

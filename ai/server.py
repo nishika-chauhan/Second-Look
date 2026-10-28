@@ -1,8 +1,7 @@
 """
 Second Look: mock-mode belief/planner API (role B), v2.
 
-Serves the real belief + planner code over FastAPI + WebSocket so the dashboard
-(role A) can be built and tested before the simulator is wired in.
+Serves the belief + planner code over FastAPI + WebSocket and routes actions to the live MuJoCo simulator.
 
 Run (from the ai/ folder):
     pip install fastapi "uvicorn[standard]" openai
@@ -49,8 +48,9 @@ import planner as PL  # noqa: E402
 import regions_belief as RB  # noqa: E402
 
 DEFAULT_ORIGINS = [
-    "http://localhost:5173", "http://127.0.0.1:5173",      # Vite dev server
-    "http://localhost:4173", "http://127.0.0.1:4173",      # Vite preview
+    "http://localhost:3000", "http://127.0.0.1:3000",
+    "http://localhost:5173", "http://127.0.0.1:5173",
+    "http://localhost:4173", "http://127.0.0.1:4173",
 ]
 
 
@@ -60,12 +60,17 @@ def allowed_origins() -> list:
 
 
 ORIGINS = allowed_origins()
+VERCEL_ORIGIN_RE = r"https://[a-zA-Z0-9-]+(?:-[a-zA-Z0-9-]+)*\.vercel\.app"
 
 
 def origin_ok(origin: str | None) -> bool:
-    if "*" in ORIGINS or origin is None:
+    if origin is None or "*" in ORIGINS:
         return True
-    return origin in ORIGINS
+    if origin in ORIGINS:
+        return True
+    from urllib.parse import urlparse
+    parsed = urlparse(origin)
+    return parsed.scheme == "https" and parsed.hostname is not None and parsed.hostname.endswith(".vercel.app")
 
 
 # --------------------------------------------------------------------------
@@ -263,7 +268,14 @@ class MockEpisode:
 # --------------------------------------------------------------------------
 
 app = FastAPI(title="Second Look: mock belief/planner API")
-app.add_middleware(CORSMiddleware, allow_origins=ORIGINS, allow_methods=["*"], allow_headers=["*"])
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=ORIGINS,
+    allow_origin_regex=VERCEL_ORIGIN_RE,
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/")
@@ -304,34 +316,190 @@ async def simulator_command(payload: dict):
         ) from exc
 
 
+@app.post("/simulator/reset")
+async def simulator_reset(payload: dict):
+    simulator_url = os.getenv("SIMULATOR_URL", "http://127.0.0.1:8001").rstrip("/")
+    try:
+        async with httpx.AsyncClient(timeout=120.0) as client:
+            response = await client.post(f"{simulator_url}/simulator/reset", json=payload)
+            response.raise_for_status()
+            return response.json()
+    except httpx.HTTPStatusError as exc:
+        raise HTTPException(status_code=exc.response.status_code, detail=exc.response.text) from exc
+    except httpx.RequestError as exc:
+        raise HTTPException(status_code=503, detail="Simulator service is unavailable or timed out.") from exc
+
+
 @app.websocket("/ws")
 async def ws_endpoint(websocket: WebSocket):
     origin = websocket.headers.get("origin")
     if not origin_ok(origin):
-        await websocket.close(code=1008)                   # policy violation
+        await websocket.close(code=1008)
         return
     await websocket.accept()
+
+    simulator_url = os.getenv("SIMULATOR_URL", "http://127.0.0.1:8001").rstrip("/")
+    current_task: asyncio.Task | None = None
+    current_episode_id = ""
+    active_episode: dict = {"episode_id": None, "belief": None, "ctx": None, "target": None, "t": 0.0}
+    active_mock: dict = {"episode": None}
 
     async def send(payload: dict):
         await websocket.send_text(json.dumps(payload))
 
-    current: dict = {"episode": None, "task": None}
+    async def sim_post(path: str, payload: dict) -> dict:
+        async with httpx.AsyncClient(timeout=180.0) as client:
+            response = await client.post(f"{simulator_url}{path}", json=payload)
+            response.raise_for_status()
+            return response.json()
 
-    async def run_episode(ep: MockEpisode):
+    async def run_live_episode(cmd: dict, episode_id: str):
+        engine = cmd.get("engine", "rule")
+        if engine not in ("rule", "auto", "llm", "nemotron"):
+            await send({"type": "error", "why": f"unknown engine {engine!r}"})
+            return
+        target = cmd.get("target", "bottle_blue")
+        if target not in PL.OBJECTS:
+            await send({"type": "error", "why": f"unknown target {target!r}"})
+            return
+        true_place = cmd.get("true_place", "L")
+        if true_place not in RB.HIDING:
+            true_place = "L"
+        start = cmd.get("start", "home")
+        hidden_place = true_place
+
+        seed = int(cmd.get("seed", 0))
+        planner = get_planner(engine)
+        log_start = len(planner.log)
+        t0 = 0.0
+        looks = 0
+        sensor_events: list[tuple[float, str]] = []
+
+        belief = RB.Belief(target, "L", 1.0 / 3.0, 0.0)
+        ctx = PL.PlanContext(obj=target, now=0.0, last_seen_t=0.0)
+
         try:
-            await ep.run()
+            reset_result = await sim_post(
+                "/simulator/reset",
+                {
+                    "target": target,
+                    "start": start,
+                    "seed": seed,
+                    "hidden_place": hidden_place,
+                },
+            )
+            obs = reset_result.get("observation", {})
+            t0 = float(obs.get("simulation_time", 0.0))
+            active_episode.update({"episode_id": episode_id, "belief": belief, "ctx": ctx,
+                                   "target": target, "t": t0})
+            state = obs.get("state", [])
+            visible = bool(obs.get("target_visible", False))
+            await send({
+                "type": "observation", "episode_id": episode_id, "t": t0,
+                "front_image": obs.get("front"), "wrist_image": obs.get("wrist"),
+                "state": state, "detections": [], "occluders": [], "events": [], "sensor_event": None,
+            })
+            await send({"type": "belief", "episode_id": episode_id, "t": t0,
+                        "object": target, "place": belief.place, "confidence": belief.conf,
+                        "last_seen_t": belief.t, "status": belief_status(belief.conf, visible)})
+
+            success = False
+            for _ in range(len(RB.HIDING) + 2):
+                ctx.now = t0
+                
+                sensor_event_count = len(ctx.sensor_events)
+
+                dec = await asyncio.to_thread(planner.decide, belief, ctx, visible)
+                decision = msg_decision(dec)
+                decision.update({"episode_id": episode_id, "t": round(t0, 2)})
+                await send(decision)
+
+                action = dec.get("action")
+                if action in ("ask", "finish"):
+                    break
+                if action == "look":
+                    action_result = await sim_post("/command", {
+                        "action": "look", "target": target, "command": dec.get("target", "L"), "seed": seed
+                    })
+                    looks += 1
+                    duration = float(action_result.get("duration_s", 0.0))
+                    t0 += duration
+                    active_episode["t"] = t0
+                    found = bool(action_result.get("found", False))
+                    await send({"type": "action_result", "episode_id": episode_id, "t": round(t0, 2),
+                                "skill": "look", "ok": bool(action_result.get("ok")) and found,
+                                "duration_s": round(duration, 2), "target": target,
+                                "place": dec.get("target")})
+                    PL.note_look_result(belief, ctx, dec.get("target", "L"), found, t0)
+                    
+                    # If an object disturbance occurred during this look,
+                    # do not keep the location ruled out using stale information.
+                    if len(ctx.sensor_events) > sensor_event_count:
+                        ctx.ruled_out.clear()
+
+                    obs = action_result.get("observation", {})
+                    visible = bool(obs.get("target_visible", False))
+                    await send({"type": "observation", "episode_id": episode_id, "t": round(t0, 2),
+                                "front_image": obs.get("front"), "wrist_image": obs.get("wrist"),
+                                "state": obs.get("state", []), "detections": [], "occluders": [], "events": [],
+                                "sensor_event": None})
+                    await send({"type": "belief", "episode_id": episode_id, "t": round(t0, 2),
+                                "object": target, "place": belief.place, "confidence": belief.conf,
+                                "last_seen_t": belief.t,
+                                "status": belief_status(belief.conf, visible)})
+                    if not found:
+                        continue
+                elif action == "pick":
+                    action_result = await sim_post("/command", {
+                        "action": "pick", "target": target, "seed": seed
+                    })
+                    duration = float(action_result.get("duration_s", 0.0))
+                    t0 += duration
+                    active_episode["t"] = t0
+
+                    success = (
+                        bool(action_result.get("ok"))
+                        and bool(action_result.get("in_tray", False))
+                    )
+
+                    await send({
+                        "type": "action_result",
+                        "episode_id": episode_id,
+                        "t": round(t0, 2),
+                        "skill": "pick",
+                        "ok": success,
+                        "in_tray": bool(action_result.get("in_tray", False)),
+                        "duration_s": round(duration, 2),
+                        "target": target,
+                        "gripper_state_at_end": action_result.get(
+                            "observation", {}
+                        ).get("state", [None, None, None, None])[-1],
+                    })
+                    
+                    ctx.delivered = success
+                    if not success:
+                        PL.note_grasp_result(belief, ctx, False, t0)
+                    break
+                else:
+                    await send({"type": "error", "episode_id": episode_id,
+                                "why": f"unsupported planner action {action!r}"})
+                    break
+
+            llm_calls = sum(1 for row in planner.log[log_start:] if row.get("llm_attempted"))
+            await send({"type": "episode_end", "episode_id": episode_id, "success": success,
+                        "total_time_s": round(t0, 2), "looks": looks, "llm_calls": llm_calls,
+                        "ground_truth_place": true_place if start.startswith("look_") else None})
         except asyncio.CancelledError:
             raise
-        except Exception as e:                             # never let a bug kill the socket silently
-            try:
-                await send({"type": "error", "why": f"episode failed: {type(e).__name__}: {e}"})
-            except Exception:
-                pass
-
-    def cancel_current():
-        task = current["task"]
-        if task and not task.done():
-            task.cancel()
+        except httpx.HTTPStatusError as exc:
+            await send({"type": "error", "episode_id": episode_id,
+                        "why": f"simulator returned HTTP {exc.response.status_code}: {exc.response.text[:300]}"})
+        except (httpx.RequestError, asyncio.TimeoutError) as exc:
+            await send({"type": "error", "episode_id": episode_id,
+                        "why": f"simulator unavailable: {type(exc).__name__}"})
+        except Exception as exc:
+            await send({"type": "error", "episode_id": episode_id,
+                        "why": f"live episode failed: {type(exc).__name__}: {exc}"})
 
     try:
         while True:
@@ -341,47 +509,100 @@ async def ws_endpoint(websocket: WebSocket):
             except json.JSONDecodeError:
                 await send({"type": "error", "why": "bad JSON"})
                 continue
-
             name = cmd.get("cmd")
             if name == "start":
-                engine = cmd.get("engine", "rule")
-                if engine not in ("rule", "auto", "llm", "nemotron"):
-                    await send({"type": "error", "why": f"unknown engine {engine!r}"})
-                    continue
-                if str(cmd.get("true_place", "L")) not in RB.HIDING:
-                    await send({"type": "error", "why": f"unknown true_place {cmd.get('true_place')!r}; use one of {RB.HIDING}"})
-                    continue
-                cancel_current()
-                ep = MockEpisode(
-                    send=send,
-                    scenario=cmd.get("scenario", "S2"),
-                    hidden_seconds=cmd.get("hidden_seconds", 40.0),
-                    move_prob=cmd.get("move_prob", 0.0),
-                    sensor_detect_rate=cmd.get("sensor_detect_rate", 0.0),
-                    false_alarm_rate=cmd.get("false_alarm_rate", 0.0),
-                    sim_speed=cmd.get("sim_speed", 5.0),
-                    true_place=cmd.get("true_place"),
-                    grasp_fail_prob=cmd.get("grasp_fail_prob", 0.1),
-                    engine=engine,
-                    seed=cmd.get("seed"),
-                )
-                current["episode"] = ep
-                current["task"] = asyncio.create_task(run_episode(ep))
-            elif name == "move_object":
-                ep = current["episode"]
-                if ep and current["task"] and not current["task"].done():
-                    ep.move_requested = True
+                if current_task and not current_task.done():
+                    current_task.cancel()
+                
+                # Check whether to run MockEpisode or real live simulator episode
+                is_mock = (
+                    cmd.get("mode") == "mock"
+                    or "scenario" in cmd
+                    or "hidden_seconds" in cmd
+                    or "grasp_fail_prob" in cmd
+                ) and cmd.get("mode") != "live"
+
+                if is_mock:
+                    engine = cmd.get("engine", "rule")
+                    if engine not in ("rule", "auto", "llm", "nemotron"):
+                        await send({"type": "error", "why": f"unknown engine {engine!r}"})
+                        continue
+                    if str(cmd.get("true_place", "L")) not in RB.HIDING:
+                        await send({"type": "error", "why": f"unknown true_place {cmd.get('true_place')!r}; use one of {RB.HIDING}"})
+                        continue
+                    ep = MockEpisode(
+                        send=send,
+                        scenario=cmd.get("scenario", "S2"),
+                        hidden_seconds=cmd.get("hidden_seconds", 40.0),
+                        move_prob=cmd.get("move_prob", 0.0),
+                        sensor_detect_rate=cmd.get("sensor_detect_rate", 0.0),
+                        false_alarm_rate=cmd.get("false_alarm_rate", 0.0),
+                        sim_speed=cmd.get("sim_speed", 5.0),
+                        true_place=cmd.get("true_place"),
+                        grasp_fail_prob=cmd.get("grasp_fail_prob", 0.1),
+                        engine=engine,
+                        seed=cmd.get("seed"),
+                    )
+                    active_mock["episode"] = ep
+                    current_task = asyncio.create_task(ep.run())
                 else:
-                    await send({"type": "error", "why": "no running episode to move the object in"})
+                    active_mock["episode"] = None
+                    current_episode_id = str(cmd.get("episode_id") or f"live-{random.randint(100000, 999999)}")
+                    current_task = asyncio.create_task(run_live_episode(cmd, current_episode_id))
             elif name == "reset":
-                cancel_current()
-                await send({"type": "reset_ack"})
+                if current_task and not current_task.done():
+                    current_task.cancel()
+                active_mock["episode"] = None
+                try:
+                    result = await sim_post("/simulator/reset", {
+                        "target": cmd.get("target", "bottle_blue"),
+                        "start": cmd.get("start", "home"), "seed": int(cmd.get("seed", 0))
+                    })
+                    await send({"type": "reset_ack", "observation": result.get("observation")})
+                except Exception:
+                    # In mock mode or when simulator is offline, respond with clean reset_ack
+                    await send({"type": "reset_ack"})
+            elif name == "move_object":
+                mock_ep = active_mock.get("episode")
+                if mock_ep and current_task and not current_task.done():
+                    mock_ep.move_requested = True
+                    continue
+                target = active_episode.get("target") or cmd.get("target", "bottle_blue")
+                try:
+                    result = await sim_post("/command", {"action": "disturb", "target": target,
+                                                          "seed": int(cmd.get("seed", 0))})
+                    event = result.get("event")
+                    belief = active_episode.get("belief")
+                    ctx = active_episode.get("ctx")
+                    now = float(active_episode.get("t", 0.0))
+                    if event and belief is not None and ctx is not None:
+                        event = dict(event)
+                        event["t"] = now
+                        EW.process_event(event, {target: belief}, now)
+                        ctx.sensor_events.append((now, event.get("zone", "L")))
+                        # A disturbance invalidates previous negative search results.
+                        ctx.ruled_out.clear()
+                        ctx.now = now
+                    obs = result.get("observation", {})
+                    await send({"type": "observation", "episode_id": active_episode.get("episode_id"),
+                                "t": round(now, 2), "front_image": obs.get("front"),
+                                "wrist_image": obs.get("wrist"), "state": obs.get("state", []),
+                                "detections": [], "occluders": [], "events": [event] if event else [],
+                                "sensor_event": event})
+                    if belief is not None:
+                        await send({"type": "belief", "episode_id": active_episode.get("episode_id"),
+                                    "t": round(now, 2), "object": target, "place": belief.place,
+                                    "confidence": belief.conf, "last_seen_t": belief.t,
+                                    "status": belief_status(belief.conf, bool(obs.get("target_visible", False)))})
+                except Exception as exc:
+                    await send({"type": "error", "why": f"simulated disturbance failed: {type(exc).__name__}: {exc}"})
             else:
                 await send({"type": "error", "why": f"unknown cmd {name!r}"})
     except WebSocketDisconnect:
         pass
     finally:
-        cancel_current()
+        if current_task and not current_task.done():
+            current_task.cancel()
 
 
 if __name__ == "__main__":
