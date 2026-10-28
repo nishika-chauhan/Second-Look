@@ -1,4 +1,4 @@
-﻿services:
+services:
   simulator:
     build:
       context: .
@@ -26,6 +26,7 @@
       - "8000:8000"
     environment:
       SIMULATOR_URL: "http://simulator:8001"
+      ALLOWED_ORIGINS: "${ALLOWED_ORIGINS:-*}"
       OPENAI_API_KEY: "${OPENAI_API_KEY:-}"
       NEBIUS_API_KEY: "${NEBIUS_API_KEY:-}"
     depends_on:
