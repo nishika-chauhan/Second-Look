@@ -1,39 +1,103 @@
-import { LayoutDashboard, Bot, Brain, FlaskConical, BarChart3 } from 'lucide-react'
+import { LayoutDashboard, Bot, Brain, FlaskConical, BarChart3, Cpu, Sparkles } from 'lucide-react'
 import { useRobot, LIVE } from '../RobotContext.jsx'
 import { MODE } from '../lib/constants.js'
 import { Chip, Muted } from './ui.jsx'
+import ConnectionStatus from './guidance/ConnectionStatus.jsx'
+import { useGuidance } from '../context/GuidanceContext.jsx'
 
 export const NAV = [
-  ['overview', 'Overview', LayoutDashboard], ['workstation', 'Robot Workstation', Bot], ['memory', 'Memory & Decisions', Brain],
-  ['playground', 'Recovery Playground', FlaskConical], ['analytics', 'Results & Analytics', BarChart3],
+  ['overview', 'Overview', LayoutDashboard],
+  ['workstation', 'Robot Workstation', Bot],
+  ['memory', 'Memory & Decisions', Brain],
+  ['playground', 'Recovery Playground', FlaskConical],
+  ['analytics', 'Results & Analytics', BarChart3],
 ]
-const CONN = { simulated: ['var(--ok)', 'System Online', 'Simulated event stream'], live: ['var(--ok)', 'System Online', 'Backend stream connected'],
-  connecting: ['var(--mem)', 'Connecting', 'Reaching the backend'], offline: ['var(--bad)', 'Offline', 'Reconnecting to the backend'] }
 
 export default function Sidebar({ view, setView }) {
   const { s, a } = useRobot()
-  const [c, t1, t2] = CONN[s.conn]
+  const { startTour, openArchModal } = useGuidance()
+
   return (
-    <aside className="flex flex-col gap-1.5 border-b border-ln bg-s1 p-4 lg:sticky lg:top-0 lg:h-screen lg:overflow-auto lg:border-b-0 lg:border-r lg:px-3.5 lg:py-5">
-      <div><h1 className="text-[22px] font-bold tracking-tight">Second Look</h1><Muted>Intelligent robot retrieval and recovery</Muted></div>
-      <div className="my-3 flex items-center gap-2 text-[13px]" role="status">
-        <i className="h-2.5 w-2.5 flex-none rounded-full" style={{ background: c }} />
-        <span>{t1}<br /><span className="text-mu">{t2}</span></span>
+    <aside className="flex flex-col gap-2 border-b border-ln bg-s1 p-4 lg:sticky lg:top-0 lg:h-screen lg:overflow-auto lg:border-b-0 lg:border-r lg:px-4 lg:py-5">
+      <div>
+        <div className="flex items-center gap-1.5 mb-1">
+          <span className="h-2 w-2 rounded-full bg-obs" />
+          <span className="text-[10px] font-bold uppercase tracking-wider text-obs">
+            Warehouse Intelligence
+          </span>
+        </div>
+        <h1 className="text-[22px] font-bold tracking-tight text-tx">Second Look</h1>
+        <Muted className="text-xs">Intelligent robot retrieval & failure recovery</Muted>
       </div>
-      <nav className="flex gap-1 overflow-x-auto lg:flex-col">
+
+      <div className="my-2">
+        <ConnectionStatus />
+      </div>
+
+      <nav data-tour="sidebar-nav" className="flex gap-1 overflow-x-auto lg:flex-col py-1">
         {NAV.map(([k, n, Icon]) => (
-          <button key={k} onClick={() => setView(k)} aria-current={view === k ? 'page' : undefined}
-            className={`flex items-center gap-2.5 whitespace-nowrap rounded-lg px-3 py-2 text-left ${view === k ? 'bg-s2 text-tx shadow-[inset_3px_0_var(--mem)]' : 'text-mu hover:text-tx'}`}>
-            <Icon size={17} aria-hidden />{n}
+          <button
+            key={k}
+            onClick={() => setView(k)}
+            aria-current={view === k ? 'page' : undefined}
+            className={`flex items-center gap-2.5 whitespace-nowrap rounded-lg px-3 py-2 text-left text-xs font-medium transition ${
+              view === k
+                ? 'bg-s2 text-tx shadow-[inset_3px_0_var(--mem)] font-semibold'
+                : 'text-mu hover:bg-s2/50 hover:text-tx'
+            }`}
+          >
+            <Icon size={16} aria-hidden className={view === k ? 'text-obs' : 'text-mu'} />
+            {n}
           </button>
         ))}
       </nav>
+
       <div className="hidden flex-1 lg:block" />
-      {!LIVE && (<>
-        <Muted className="mt-3">Robot mode</Muted>
-        <div className="mb-2.5 flex flex-wrap gap-2">{Object.entries(MODE).map(([k, n]) => <Chip key={k} on={s.mode === k} disabled={s.running} onClick={() => a.setMode(k)}>{n}</Chip>)}</div>
-      </>)}
-      <Muted>Conceptual mockup. Sample values only, not live robot data.</Muted>
+
+      <div className="mt-2 space-y-2 border-t border-ln/60 pt-3">
+        {!LIVE && (
+          <div data-tour="robot-mode">
+            <Muted className="mb-1 text-[11px] font-semibold uppercase tracking-wider">
+              Operating Mode
+            </Muted>
+            <div className="mb-2 flex flex-wrap gap-1.5">
+              {Object.entries(MODE).map(([k, n]) => (
+                <Chip
+                  key={k}
+                  on={s.mode === k}
+                  disabled={s.running}
+                  onClick={() => a.setMode(k)}
+                  className="text-xs px-2.5 py-1"
+                >
+                  {n}
+                </Chip>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className="space-y-1">
+          <button
+            onClick={openArchModal}
+            className="flex w-full items-center gap-2 rounded-lg border border-ln/70 bg-s2/40 px-2.5 py-1.5 text-left text-[11px] text-mu transition hover:border-obs hover:text-tx"
+          >
+            <Cpu size={13} className="text-obs flex-none" />
+            <span className="truncate">Nebius + NVIDIA Stack</span>
+          </button>
+
+          <button
+            onClick={() => startTour('welcome')}
+            className="flex w-full items-center gap-2 rounded-lg border border-ln/70 bg-s2/40 px-2.5 py-1.5 text-left text-[11px] text-mu transition hover:border-obs hover:text-tx"
+          >
+            <Sparkles size={13} className="text-mem flex-none" />
+            <span className="truncate">Start Guided Tour</span>
+          </button>
+        </div>
+
+        <p className="text-[10px] text-mu/80 leading-relaxed pt-1">
+          Developed for the Nebius × NVIDIA AI Hackathon. Physics-grounded simulation & Bayesian reasoning.
+        </p>
+      </div>
     </aside>
   )
 }

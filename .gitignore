@@ -26,3 +26,6 @@ models/
 smolvla_*.csv
 expert_*.csv
 rollout_results.csv
+
+dist/
+**/dist/

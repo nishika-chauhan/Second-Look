@@ -29,6 +29,7 @@ Server -> client message types (plan Part 2.2):
 from __future__ import annotations
 
 import os
+import time
 import httpx
 from fastapi import HTTPException
 import asyncio
@@ -60,6 +61,9 @@ def allowed_origins() -> list:
 
 
 ORIGINS = allowed_origins()
+_SERVER_START_TIME = time.time()
+_NEBIUS_CACHE = {"last_check": 0, "verified": False, "detail": ""}
+_LAST_SIM_OK = False
 VERCEL_ORIGIN_RE = r"https://[a-zA-Z0-9-]+(?:-[a-zA-Z0-9-]+)*\.vercel\.app"
 
 
@@ -286,6 +290,92 @@ async def root():
 @app.get("/health")
 async def health():
     return {"ok": True, "allowed_origins": ORIGINS}
+
+
+@app.get("/api/status")
+async def api_status(check: bool = False):
+    now = time.time()
+    backend_info = {
+        "status": "connected",
+        "service": "FastAPI",
+        "version": "2.1.0",
+        "uptime_s": round(now - _SERVER_START_TIME, 1),
+    }
+
+    simulator_url = os.getenv("SIMULATOR_URL", "http://127.0.0.1:8001").rstrip("/")
+    sim_status = "connected" if _LAST_SIM_OK else "standby"
+    sim_detail = "Live simulation service configured"
+
+    nebius_key = os.getenv("NEBIUS_API_KEY", "").strip()
+    configured_model = os.getenv("NEMOTRON_MODEL", "nvidia/nemotron-4-340b-instruct")
+
+    nebius_info = {
+        "status": "configured" if nebius_key else "unconfigured",
+        "base_url": "https://api.tokenfactory.nebius.com/v1/",
+        "configured": bool(nebius_key),
+        "detail": "Nebius API key configured in environment" if nebius_key else "NEBIUS_API_KEY environment variable not set",
+    }
+
+    nemotron_info = {
+        "status": "ready" if nebius_key else "offline",
+        "model": configured_model,
+        "detail": "NVIDIA Nemotron available for AI reasoning" if nebius_key else "AI inference endpoint offline. Fast rule-based planner active as backup.",
+        "fallback_active": not bool(nebius_key),
+    }
+
+    if check:
+        # Check simulator with strict connect timeout
+        try:
+            async with httpx.AsyncClient(timeout=httpx.Timeout(0.5, connect=0.2)) as client:
+                res = await client.get(f"{simulator_url}/health")
+                if res.status_code == 200:
+                    sim_status = "connected"
+                    sim_detail = res.json().get("environment", "SecondLookEnv")
+        except Exception:
+            sim_status = "offline"
+            sim_detail = "Simulator service unreachable"
+
+        # Check Nebius with cache
+        if nebius_key and (now - _NEBIUS_CACHE.get("last_check", 0) > 30):
+            try:
+                from openai import OpenAI
+                client = OpenAI(base_url=nebius_info["base_url"], api_key=nebius_key, timeout=2.0)
+                models = client.models.list()
+                model_ids = [m.id for m in models.data]
+                has_nemotron = any("nemotron" in m.lower() for m in model_ids)
+                _NEBIUS_CACHE["last_check"] = now
+                _NEBIUS_CACHE["verified"] = True
+                _NEBIUS_CACHE["has_nemotron"] = has_nemotron
+                _NEBIUS_CACHE["detail"] = f"Verified: {len(model_ids)} models available via Token Factory"
+            except Exception as exc:
+                _NEBIUS_CACHE["last_check"] = now
+                _NEBIUS_CACHE["verified"] = False
+                _NEBIUS_CACHE["detail"] = f"Inference check failed: {type(exc).__name__}"
+
+    if _NEBIUS_CACHE.get("last_check", 0) > 0:
+        if _NEBIUS_CACHE.get("verified"):
+            nebius_info["status"] = "verified"
+            nebius_info["detail"] = _NEBIUS_CACHE.get("detail")
+            nemotron_info["status"] = "ready"
+        else:
+            nebius_info["status"] = "degraded"
+            nebius_info["detail"] = _NEBIUS_CACHE.get("detail")
+            nemotron_info["status"] = "offline"
+
+    return {
+        "ok": True,
+        "backend": backend_info,
+        "simulator": {
+            "status": sim_status,
+            "url": simulator_url,
+            "detail": sim_detail,
+        },
+        "nebius": nebius_info,
+        "nemotron": nemotron_info,
+        "timestamp": now,
+        "mode": "live" if (sim_status == "connected" or nebius_info["status"] in ("configured", "verified")) else "demo",
+    }
+
 
 @app.post("/simulator/command")
 async def simulator_command(payload: dict):
