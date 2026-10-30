@@ -1,30 +1,33 @@
-import { useState, useRef, useEffect } from 'react'
-import { HelpCircle, Play, RotateCcw, Cpu, Info, FlaskConical, Wifi, Sparkles, X } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { HelpCircle, Play, Info, RotateCcw, Keyboard, X } from 'lucide-react'
 import { useGuidance } from '../../context/GuidanceContext.jsx'
 
 export default function HelpAssistant() {
-  const [menuOpen, setMenuOpen] = useState(false)
-  const menuRef = useRef(null)
-
   const {
-    currentView,
-    setView,
+    helpOpen,
+    openHelp,
+    closeHelp,
     startTour,
-    openArchModal,
-    openConnModal,
     openExplain,
     resetPreferences,
   } = useGuidance()
 
+  const [shortcutsOpen, setShortcutsOpen] = useState(false)
+  const menuRef = useRef(null)
+
+  // Close on outside click
   useEffect(() => {
-    if (!menuOpen) return
+    if (!helpOpen) return
     const handleClick = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
-        setMenuOpen(false)
+        closeHelp()
       }
     }
     const handleKey = (e) => {
-      if (e.key === 'Escape') setMenuOpen(false)
+      if (e.key === 'Escape') {
+        if (shortcutsOpen) setShortcutsOpen(false)
+        else closeHelp()
+      }
     }
     document.addEventListener('mousedown', handleClick)
     document.addEventListener('keydown', handleKey)
@@ -32,106 +35,139 @@ export default function HelpAssistant() {
       document.removeEventListener('mousedown', handleClick)
       document.removeEventListener('keydown', handleKey)
     }
-  }, [menuOpen])
+  }, [helpOpen, closeHelp, shortcutsOpen])
 
   const handleAction = (cb) => {
-    setMenuOpen(false)
+    closeHelp()
     cb()
   }
 
   return (
-    <div ref={menuRef} className="fixed bottom-5 right-5 z-40">
-      {menuOpen && (
-        <div className="mb-2 w-64 rounded-2xl border border-ln bg-s1/95 p-3 shadow-2xl shadow-black/80 backdrop-blur-md animate-in fade-in zoom-in-95 duration-150">
-          <div className="flex items-center justify-between border-b border-ln/60 pb-2 px-1">
-            <div className="flex items-center gap-1.5 text-xs font-bold text-tx">
-              <Sparkles size={14} className="text-obs" />
-              <span>Judge Assistant</span>
-            </div>
-            <button
-              onClick={() => setMenuOpen(false)}
-              className="rounded p-1 text-mu hover:bg-s2 hover:text-tx"
-            >
-              <X size={14} />
-            </button>
-          </div>
+    <>
+      {/* Mobile-only subtle floating trigger (desktop uses sidebar Help entry) */}
+      <div className="fixed bottom-4 right-4 z-30 lg:hidden">
+        <button
+          onClick={openHelp}
+          className="flex h-9 w-9 items-center justify-center rounded-full border border-ln bg-s1 text-obs shadow-lg shadow-black/60 transition hover:bg-s2"
+          aria-label="Open Help Menu"
+        >
+          <HelpCircle size={18} />
+        </button>
+      </div>
 
-          <div className="mt-2 space-y-1">
-            <button
-              onClick={() => handleAction(() => startTour('welcome'))}
-              className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-xs font-medium text-tx transition hover:bg-s2 hover:text-obs"
-            >
-              <Play size={14} className="text-obs" />
-              <span>Start Full Product Tour</span>
-            </button>
-
-            {currentView !== 'overview' && (
+      {/* Compact Help Menu Modal / Popover */}
+      {helpOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs animate-in fade-in duration-150">
+          <div
+            ref={menuRef}
+            className="relative w-full max-w-xs rounded-xl border border-ln bg-s1 p-4 shadow-2xl shadow-black/80"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-ln/60 pb-2.5">
+              <div className="flex items-center gap-2">
+                <HelpCircle size={15} className="text-obs" />
+                <h3 className="text-xs font-bold text-tx uppercase tracking-wider">
+                  Help & Guidance
+                </h3>
+              </div>
               <button
-                onClick={() => handleAction(() => startTour(currentView))}
+                onClick={closeHelp}
+                className="rounded p-1 text-mu hover:text-tx transition"
+                aria-label="Close"
+              >
+                <X size={15} />
+              </button>
+            </div>
+
+            <div className="mt-2 space-y-1">
+              <button
+                onClick={() => handleAction(() => startTour('welcome'))}
                 className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-xs font-medium text-tx transition hover:bg-s2 hover:text-obs"
               >
-                <RotateCcw size={14} className="text-mem" />
-                <span>Tour This Section</span>
+                <Play size={14} className="text-obs flex-none" />
+                <span>Start Guided Tour</span>
               </button>
-            )}
 
-            <button
-              onClick={() => handleAction(openExplain)}
-              className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-xs font-medium text-tx transition hover:bg-s2 hover:text-obs"
-            >
-              <Info size={14} className="text-acc" />
-              <span>Explain Current Page</span>
-            </button>
+              <button
+                onClick={() => handleAction(openExplain)}
+                className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-xs font-medium text-tx transition hover:bg-s2 hover:text-obs"
+              >
+                <Info size={14} className="text-acc flex-none" />
+                <span>Explain This Page</span>
+              </button>
 
-            <button
-              onClick={() =>
-                handleAction(() => {
-                  setView('playground')
-                })
-              }
-              className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-xs font-medium text-tx transition hover:bg-s2 hover:text-obs"
-            >
-              <FlaskConical size={14} className="text-mem" />
-              <span>Try Recovery Scenarios</span>
-            </button>
-
-            <button
-              onClick={() => handleAction(openArchModal)}
-              className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-xs font-medium text-tx transition hover:bg-s2 hover:text-obs"
-            >
-              <Cpu size={14} className="text-obs" />
-              <span>Nebius + NVIDIA Architecture</span>
-            </button>
-
-            <button
-              onClick={() => handleAction(openConnModal)}
-              className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-xs font-medium text-tx transition hover:bg-s2 hover:text-obs"
-            >
-              <Wifi size={14} className="text-ok" />
-              <span>Infrastructure & AI Status</span>
-            </button>
-
-            <div className="border-t border-ln/60 pt-1 mt-1">
               <button
                 onClick={() => handleAction(resetPreferences)}
-                className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-left text-[11px] text-mu transition hover:bg-s2 hover:text-tx"
+                className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-xs font-medium text-tx transition hover:bg-s2 hover:text-obs"
               >
-                <RotateCcw size={12} />
-                <span>Reset Onboarding / Welcome</span>
+                <RotateCcw size={14} className="text-mem flex-none" />
+                <span>Restart Onboarding</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  closeHelp()
+                  setShortcutsOpen(true)
+                }}
+                className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-xs font-medium text-tx transition hover:bg-s2 hover:text-obs"
+              >
+                <Keyboard size={14} className="text-mu flex-none" />
+                <span>View Keyboard Shortcuts</span>
               </button>
             </div>
           </div>
         </div>
       )}
 
-      <button
-        onClick={() => setMenuOpen((v) => !v)}
-        className="flex items-center gap-2 rounded-full border border-ln bg-s1 px-4 py-2.5 text-xs font-bold text-tx shadow-lg shadow-black/60 transition hover:border-obs hover:bg-s2 hover:text-obs"
-        data-tour="help-assistant"
-      >
-        <HelpCircle size={16} className="text-obs" />
-        <span>Help & Tour</span>
-      </button>
-    </div>
+      {/* Keyboard Shortcuts Dialog */}
+      {shortcutsOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs animate-in fade-in duration-150"
+          onClick={() => setShortcutsOpen(false)}
+        >
+          <div
+            className="relative w-full max-w-sm rounded-xl border border-ln bg-s1 p-5 shadow-2xl shadow-black/80"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-ln/60 pb-3">
+              <div className="flex items-center gap-2">
+                <Keyboard size={16} className="text-obs" />
+                <h3 className="text-sm font-bold text-tx">Keyboard Shortcuts</h3>
+              </div>
+              <button
+                onClick={() => setShortcutsOpen(false)}
+                className="rounded p-1 text-mu hover:text-tx transition"
+              >
+                <X size={15} />
+              </button>
+            </div>
+
+            <div className="mt-3 space-y-2 text-xs">
+              <div className="flex items-center justify-between rounded-lg border border-ln/60 bg-s2/40 px-3 py-2">
+                <span className="text-tx">Skip / Close Modal or Tour</span>
+                <kbd className="rounded border border-ln bg-s1 px-2 py-0.5 font-mono text-[11px] text-mu">Esc</kbd>
+              </div>
+              <div className="flex items-center justify-between rounded-lg border border-ln/60 bg-s2/40 px-3 py-2">
+                <span className="text-tx">Next Tour Step</span>
+                <kbd className="rounded border border-ln bg-s1 px-2 py-0.5 font-mono text-[11px] text-mu">→</kbd>
+              </div>
+              <div className="flex items-center justify-between rounded-lg border border-ln/60 bg-s2/40 px-3 py-2">
+                <span className="text-tx">Previous Tour Step</span>
+                <kbd className="rounded border border-ln bg-s1 px-2 py-0.5 font-mono text-[11px] text-mu">←</kbd>
+              </div>
+            </div>
+
+            <div className="mt-4 flex justify-end border-t border-ln/60 pt-3">
+              <button
+                onClick={() => setShortcutsOpen(false)}
+                className="rounded-md bg-obs px-3.5 py-1 text-xs font-bold text-[#06201c] hover:bg-obs/90"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   )
 }

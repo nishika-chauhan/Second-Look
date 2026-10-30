@@ -1,4 +1,4 @@
-import { LayoutDashboard, Bot, Brain, FlaskConical, BarChart3, Cpu, Sparkles } from 'lucide-react'
+import { LayoutDashboard, Bot, Brain, FlaskConical, BarChart3, Cpu, HelpCircle } from 'lucide-react'
 import { useRobot, LIVE } from '../RobotContext.jsx'
 import { MODE } from '../lib/constants.js'
 import { Chip, Muted } from './ui.jsx'
@@ -15,7 +15,7 @@ export const NAV = [
 
 export default function Sidebar({ view, setView }) {
   const { s, a } = useRobot()
-  const { startTour, openArchModal } = useGuidance()
+  const { openHelp, openArchModal } = useGuidance()
 
   return (
     <aside className="flex flex-col gap-2 border-b border-ln bg-s1 p-4 lg:sticky lg:top-0 lg:h-screen lg:overflow-auto lg:border-b-0 lg:border-r lg:px-4 lg:py-5">
@@ -80,17 +80,19 @@ export default function Sidebar({ view, setView }) {
           <button
             onClick={openArchModal}
             className="flex w-full items-center gap-2 rounded-lg border border-ln/70 bg-s2/40 px-2.5 py-1.5 text-left text-[11px] text-mu transition hover:border-obs hover:text-tx"
+            data-tour="arch-button"
           >
             <Cpu size={13} className="text-obs flex-none" />
-            <span className="truncate">Nebius + NVIDIA Stack</span>
+            <span className="truncate">Nebius + NVIDIA Architecture</span>
           </button>
 
           <button
-            onClick={() => startTour('welcome')}
+            onClick={openHelp}
             className="flex w-full items-center gap-2 rounded-lg border border-ln/70 bg-s2/40 px-2.5 py-1.5 text-left text-[11px] text-mu transition hover:border-obs hover:text-tx"
+            data-tour="sidebar-help"
           >
-            <Sparkles size={13} className="text-mem flex-none" />
-            <span className="truncate">Start Guided Tour</span>
+            <HelpCircle size={13} className="text-mem flex-none" />
+            <span className="truncate">Help & Guided Tour</span>
           </button>
         </div>
 

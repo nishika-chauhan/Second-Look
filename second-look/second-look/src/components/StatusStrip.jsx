@@ -44,23 +44,23 @@ export default function StatusStrip() {
     <section
       aria-label="Status"
       data-tour="status-strip"
-      className="grid grid-cols-2 rounded-xl border border-ln bg-s1 lg:grid-cols-4 shadow-sm"
+      className="grid grid-cols-2 rounded-xl border border-ln bg-s1 lg:grid-cols-4 shadow-xs"
     >
       {cells.map((cell, i) => (
         <div
           key={cell.label}
-          className={`min-w-0 px-4 py-3 ${i % 2 ? 'border-l border-ln' : ''} ${
+          className={`min-w-0 px-3.5 py-2 ${i % 2 ? 'border-l border-ln' : ''} ${
             i > 1 ? 'border-t border-ln lg:border-t-0' : ''
           } ${i === 2 ? 'lg:border-l lg:border-ln' : ''}`}
         >
           <div className="flex items-center justify-between">
-            <p className="text-[12px] text-mu font-medium">{cell.label}</p>
+            <p className="text-[11px] text-mu font-medium">{cell.label}</p>
             <InfoTooltip tip={cell.tip} />
           </div>
-          <h3 className="my-1 flex items-center gap-2 text-[18px] font-semibold text-tx">
+          <h3 className="my-0.5 flex items-center gap-1.5 text-[16px] font-semibold text-tx leading-tight">
             {cell.value}
           </h3>
-          <p className="truncate text-[12px] text-mu">{cell.sub}</p>
+          <p className="truncate text-[11px] text-mu">{cell.sub}</p>
         </div>
       ))}
     </section>

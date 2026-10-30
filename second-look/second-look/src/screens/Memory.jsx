@@ -12,9 +12,9 @@ export default function Memory() {
   const timeline = [...s.timeline, { k: 'mem', text: `Earlier: ${o} seen on Table A (stored memory).` }]
 
   return (
-    <>
-      <div data-tour="memory-cards" className="grid gap-4 lg:grid-cols-3">
-        <Panel style={{ borderTop: '3px solid var(--mem)' }}>
+    <div className="space-y-3">
+      <div data-tour="memory-cards" className="grid gap-3 lg:grid-cols-3">
+        <Panel style={{ borderTop: '3px solid var(--mem)' }} className="p-3.5">
           <div className="flex items-center justify-between">
             <Muted>Last-known location</Muted>
             <InfoTooltip
@@ -22,10 +22,10 @@ export default function Memory() {
               body="Historical coordinate stored in the warehouse database before task initiation."
             />
           </div>
-          <h2 className="text-[17px] font-semibold mt-1">{L[s.last].n}</h2>
+          <h2 className="text-[16px] font-semibold text-tx mt-0.5">{L[s.last].n}</h2>
         </Panel>
 
-        <Panel style={{ borderTop: '3px solid var(--obs)' }}>
+        <Panel style={{ borderTop: '3px solid var(--obs)' }} className="p-3.5">
           <div className="flex items-center justify-between">
             <Muted>Currently detected</Muted>
             <InfoTooltip
@@ -33,12 +33,12 @@ export default function Memory() {
               body="Ground-truth camera reading from the robot's overhead scanner upon arrival at a workstation."
             />
           </div>
-          <h2 className="text-[17px] font-semibold mt-1">
+          <h2 className="text-[16px] font-semibold text-tx mt-0.5">
             {s.obs ? (s.obs.seen ? L[s.obs.loc].n : `Not on ${L[s.obs.loc].n}`) : 'No observation yet'}
           </h2>
         </Panel>
 
-        <Panel style={{ borderTop: '3px solid var(--acc)' }}>
+        <Panel style={{ borderTop: '3px solid var(--acc)' }} className="p-3.5">
           <div className="flex items-center justify-between">
             <Muted>Most likely location</Muted>
             <InfoTooltip
@@ -46,23 +46,23 @@ export default function Memory() {
               body="Highest-probability station calculated by fusing historical priors with real-time sensory evidence."
             />
           </div>
-          <h2 className="text-[17px] font-semibold mt-1">{L[bl].n}, {pc(s.beliefs[bl])}</h2>
+          <h2 className="text-[16px] font-semibold text-tx mt-0.5">{L[bl].n}, {pc(s.beliefs[bl])}</h2>
         </Panel>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[1.6fr_1fr]">
-        <Panel data-tour="belief-bars">
+      <div className="grid gap-3 lg:grid-cols-[1.6fr_1fr]">
+        <Panel data-tour="belief-bars" className="p-3.5">
           <div className="flex items-center justify-between mb-2">
-            <H className="mb-0">Where the robot thinks the {o} is</H>
+            <H className="mb-0 text-xs">Where the robot thinks the {o} is</H>
             <InfoTooltip
               title="Bayesian Belief Updating"
               body="Probability mass is distributed across known stations (A, B, C) and uncertainty (U). Missing an item at Table A drops its confidence from 92% to 2% and redistributes the remainder."
             />
           </div>
           {['A', 'B', 'C', 'U'].map((k) => (
-            <div key={k} className="my-2.5 grid grid-cols-[88px_1fr_48px] items-center gap-2.5">
+            <div key={k} className="my-2 grid grid-cols-[84px_1fr_44px] items-center gap-2">
               <span className="text-xs font-medium text-tx">{k === 'U' ? 'Out of view' : L[k].n}</span>
-              <div className="h-2 overflow-hidden rounded bg-s2">
+              <div className="h-1.5 overflow-hidden rounded bg-s2">
                 <div
                   className="h-full bg-mem transition-all duration-500"
                   style={{ width: pc(s.beliefs[k]) }}
@@ -72,66 +72,68 @@ export default function Memory() {
             </div>
           ))}
 
-          <div data-tour="evidence-stream" className="mt-5 border-t border-ln/60 pt-3">
+          <div data-tour="evidence-stream" className="mt-4 border-t border-ln/60 pt-2.5">
             <div className="flex items-center justify-between mb-1">
-              <H className="mb-0">Evidence updates</H>
+              <H className="mb-0 text-xs">Evidence updates</H>
               <InfoTooltip
                 title="Reasoning Chain"
                 body="Step-by-step mathematical updates showing how sensor observations transform the belief distribution."
               />
             </div>
-            <ul className="max-h-72 space-y-1.5 overflow-auto text-[13px]">
+            <ul className="max-h-60 space-y-1 overflow-auto text-[12.5px]">
               {s.evidence.length ? (
                 s.evidence.map((x, i) => (
-                  <li key={i} className="border-l-2 border-mem py-1 pl-2.5 text-tx/90">
+                  <li key={i} className="border-l-2 border-mem py-0.5 pl-2 text-tx/90">
                     {x}
                   </li>
                 ))
               ) : (
-                <li className="border-l-2 border-ln py-1 pl-2.5 text-mu">
-                  Start a task in Robot Workstation or Recovery Playground to see how evidence updates the belief.
+                <li className="border-l-2 border-ln py-0.5 pl-2 text-mu">
+                  Start a task to see how evidence updates the belief.
                 </li>
               )}
             </ul>
           </div>
         </Panel>
 
-        <Panel data-tour="decision-card">
-          <div className="flex items-center justify-between mb-2">
-            <H className="mb-0">Next action</H>
-            <InfoTooltip
-              title="AI Recovery Policy"
-              body="NVIDIA Nemotron and Bayesian planner select the next optimal action: Trust Memory, Search Elsewhere, Retry Grasp, or Request Help."
-            />
-          </div>
-          {d ? (
-            <div className="rounded-lg border border-acc/40 bg-acc/10 p-3 text-xs leading-relaxed text-tx">
-              <strong className="text-acc">{PATH[d.path][0]}.</strong> {d.text}
-            </div>
-          ) : (
-            <p className="text-xs text-mu">No decision yet. Start a task from the Robot Workstation.</p>
-          )}
-
-          <div className="mt-5 border-t border-ln/60 pt-3">
-            <div className="flex items-center justify-between mb-1">
-              <H className="mb-0">Memory timeline</H>
+        <Panel data-tour="decision-card" className="p-3.5 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <H className="mb-0 text-xs">Next action</H>
               <InfoTooltip
-                title="Episodic Memory Trail"
-                body="Longer-horizon history recording what was observed in previous warehouse shifts."
+                title="AI Recovery Policy"
+                body="NVIDIA Nemotron and Bayesian planner select the next optimal action: Trust Memory, Search Elsewhere, Retry Grasp, or Request Help."
               />
             </div>
-            <ul className="max-h-72 space-y-1.5 overflow-auto text-[13px]">
-              {timeline.map((x, i) => (
-                <li key={i} className="border-l-2 py-1 pl-2.5 text-tx/90" style={{ borderColor: edge[x.k] || 'var(--mem)' }}>
-                  {x.text}
-                </li>
-              ))}
-            </ul>
+            {d ? (
+              <div className="rounded-lg border border-acc/40 bg-acc/10 p-2.5 text-xs leading-relaxed text-tx">
+                <strong className="text-acc">{PATH[d.path][0]}.</strong> {d.text}
+              </div>
+            ) : (
+              <p className="text-xs text-mu">No decision yet. Start a task from the Robot Workstation.</p>
+            )}
+
+            <div className="mt-4 border-t border-ln/60 pt-2.5">
+              <div className="flex items-center justify-between mb-1">
+                <H className="mb-0 text-xs">Memory timeline</H>
+                <InfoTooltip
+                  title="Episodic Memory Trail"
+                  body="Longer-horizon history recording what was observed in previous warehouse shifts."
+                />
+              </div>
+              <ul className="max-h-60 space-y-1 overflow-auto text-[12.5px]">
+                {timeline.map((x, i) => (
+                  <li key={i} className="border-l-2 py-0.5 pl-2 text-tx/90" style={{ borderColor: edge[x.k] || 'var(--mem)' }}>
+                    {x.text}
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </Panel>
       </div>
 
       <ProcessingStatus />
-    </>
+    </div>
   )
 }

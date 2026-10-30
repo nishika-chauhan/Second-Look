@@ -40,7 +40,7 @@ export default function App() {
     >
       <div className="grid min-h-screen lg:grid-cols-[256px_1fr] bg-bg text-tx antialiased selection:bg-obs/30 selection:text-tx">
         <Sidebar view={view} setView={setView} />
-        <main className="flex min-w-0 flex-col gap-4 p-4 lg:p-6">
+        <main className="flex min-w-0 flex-col gap-3 p-3.5 lg:p-5">
           <DemoModeBanner />
           <StatusStrip />
           <Screen setView={setView} />

@@ -30,10 +30,13 @@ export default function SuggestionCard() {
   }
 
   return (
-    <div className="fixed bottom-5 right-5 z-40 max-w-sm rounded-xl border border-obs/40 bg-s1/95 p-4 shadow-xl shadow-black/70 backdrop-blur-md animate-in slide-in-from-bottom-5 duration-200">
+    <div
+      className="fixed bottom-4 left-4 lg:left-[272px] z-30 max-w-sm rounded-xl border border-obs/40 bg-s1/95 p-3.5 shadow-xl shadow-black/70 backdrop-blur-md animate-in slide-in-from-bottom-3 duration-150"
+      style={{ maxWidth: 'calc(100vw - 32px)' }}
+    >
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-2 text-obs">
-          <Sparkles size={16} />
+          <Sparkles size={15} />
           <h4 className="text-xs font-bold text-tx">{activeSuggestion.title}</h4>
         </div>
         <button
@@ -41,13 +44,13 @@ export default function SuggestionCard() {
           className="rounded p-1 text-mu transition hover:bg-s2 hover:text-tx"
           aria-label="Dismiss suggestion"
         >
-          <X size={14} />
+          <X size={13} />
         </button>
       </div>
 
-      <p className="mt-1.5 text-xs text-mu leading-relaxed">{activeSuggestion.text}</p>
+      <p className="mt-1 text-[11.5px] text-mu leading-relaxed">{activeSuggestion.text}</p>
 
-      <div className="mt-3 flex items-center justify-end gap-2">
+      <div className="mt-2.5 flex items-center justify-end gap-2">
         <button
           onClick={() => dismissSuggestion(activeSuggestion.id)}
           className="px-2 py-1 text-[11px] text-mu hover:text-tx"
@@ -56,10 +59,10 @@ export default function SuggestionCard() {
         </button>
         <button
           onClick={handleAction}
-          className="flex items-center gap-1.5 rounded-lg bg-obs px-3 py-1.5 text-xs font-bold text-[#06201c] transition hover:bg-obs/90 shadow-md shadow-obs/20"
+          className="flex items-center gap-1 rounded-md bg-obs px-2.5 py-1 text-xs font-bold text-[#06201c] transition hover:bg-obs/90 shadow-sm"
         >
           <span>{activeSuggestion.actionText}</span>
-          <ArrowRight size={13} />
+          <ArrowRight size={12} />
         </button>
       </div>
     </div>
