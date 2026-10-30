@@ -24,10 +24,39 @@ All required milestones (Phases 0 through 6) have been fully developed, executed
 
 ## 2. Phase-by-Phase Deliverables
 
-### Phase 0: Orientation & Verification
+### Phase 0: Orientation & Baseline Verification
 - Audited repository files and verified environment dependencies (MuJoCo 3.13+, Python, OpenCV, NumPy).
 - Executed `sim/check_expert.py`: **30/30 passed** (mean 82 steps/episode).
 - Executed `ai/toy_check.py`: passed without error.
+- **User Independent Baseline Run Recorded:**
+  - Command: `python sim/check_expert.py`
+  - Success Rate: **30/30 (100.0%)**
+  - Steps: Mean 77 steps, Min 61, Max 104
+  - Runtime: 2.9 seconds
+  - Status: Formally recorded as passing baseline verification.
+
+### Phase 0.5: Tier 2 Held-Out Expert Sweep & Visibility Audit (Seeds 100000–100059)
+- Executed 60-episode held-out evaluation sweep via `sim/report_seeds_100000_100059.py`:
+  - **Success Rate:** **60/60 (100.0%)**, Wilson 95% CI: [94.0%, 100.0%].
+  - **Steps:** Mean 82.3 steps, Min 63, Max 126 (mean sim time: 8.23 s).
+  - **Runtime:** 61.62 seconds total wall-clock (mean 1.03 s/ep).
+  - **Target Balance:**
+    - `cup_red`: 20/20 (100.0%)
+    - `bottle_blue`: 20/20 (100.0%)
+    - `box_green`: 20/20 (100.0%)
+  - **Start Pose Balance:**
+    - `home`: 20/20 (100.0%)
+    - `look_L`: 21/21 (100.0%)
+    - `look_R`: 19/19 (100.0%)
+  - **Target Initial Front Visibility & Placement:**
+    - Initially Visible from Front (`OPEN`): 20/60 (33.3%)
+    - Initially Hidden Behind Screen L: 21/60 (35.0%)
+    - Initially Hidden Behind Screen R: 19/60 (31.7%)
+  - **Object Spatial Geometry & Visibility Across All 60 Seeds:**
+    - `cup_red`: X in [-0.332, 0.386] (mean 0.007), Y in [-0.149, 0.193] (mean 0.064), Z in [0.038, 0.040] (mean 0.039). Front visible: 28/60 (46.7%).
+    - `bottle_blue`: X in [-0.399, 0.312] (mean 0.001), Y in [-0.145, 0.186] (mean 0.056), Z in [0.033, 0.035] (mean 0.034). Front visible: 30/60 (50.0%).
+    - `box_green`: X in [-0.397, 0.384] (mean -0.056), Y in [-0.145, 0.191] (mean 0.056), Z in [0.019, 0.020] (mean 0.020). Front visible: 32/60 (53.3%).
+  - **Artifacts Generated:** `out/expert_seeds_100000_100059.csv`, `out/expert_seeds_100000_100059.json`.
 
 ### Phase 1: Scene Randomisation
 - **Files Modified:** `sim/scene_v2.xml`, `sim/world.py`.

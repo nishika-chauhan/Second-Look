@@ -25,7 +25,9 @@ WORKDIR /app
 COPY requirements.txt .
 
 # Install CPU-only PyTorch and its dependencies
-RUN pip install --no-cache-dir \
+# Cache pip downloads across failed Docker builds
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip --timeout 300 --retries 10 install \
     --index-url https://download.pytorch.org/whl/cpu \
     torch==2.11.0 torchvision==0.26.0
 

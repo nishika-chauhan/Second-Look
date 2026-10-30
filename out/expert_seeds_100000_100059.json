@@ -1,0 +1,2116 @@
+{
+  "seed_range": [
+    100000,
+    100059
+  ],
+  "episodes": 60,
+  "total_success": 60,
+  "success_rate": 1.0,
+  "wilson_95_ci": [
+    0.9398,
+    1.0
+  ],
+  "total_wall_time_s": 61.62,
+  "records": [
+    {
+      "seed": 100000,
+      "target": "bottle_blue",
+      "start_pose": "home",
+      "target_initial_place": "OPEN",
+      "target_front_visible": true,
+      "target_wrist_visible": false,
+      "cup_red_pos": [
+        -0.0573,
+        0.1102,
+        0.04
+      ],
+      "bottle_blue_pos": [
+        -0.0268,
+        -0.0888,
+        0.0347
+      ],
+      "box_green_pos": [
+        -0.3969,
+        -0.0825,
+        0.0197
+      ],
+      "front_visible_cup_red": true,
+      "front_visible_bottle_blue": true,
+      "front_visible_box_green": true,
+      "init_grip_pos": [
+        0.0,
+        -0.28,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 63,
+      "sim_time_s": 6.3,
+      "wall_time_s": 1.016
+    },
+    {
+      "seed": 100001,
+      "target": "box_green",
+      "start_pose": "home",
+      "target_initial_place": "OPEN",
+      "target_front_visible": true,
+      "target_wrist_visible": false,
+      "cup_red_pos": [
+        0.3245,
+        0.1287,
+        0.0394
+      ],
+      "bottle_blue_pos": [
+        0.2314,
+        -0.0685,
+        0.035
+      ],
+      "box_green_pos": [
+        0.0901,
+        -0.0931,
+        0.0198
+      ],
+      "front_visible_cup_red": false,
+      "front_visible_bottle_blue": true,
+      "front_visible_box_green": true,
+      "init_grip_pos": [
+        0.0,
+        -0.28,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 79,
+      "sim_time_s": 7.9,
+      "wall_time_s": 1.181
+    },
+    {
+      "seed": 100002,
+      "target": "cup_red",
+      "start_pose": "look_L",
+      "target_initial_place": "L",
+      "target_front_visible": false,
+      "target_wrist_visible": true,
+      "cup_red_pos": [
+        -0.1906,
+        0.1334,
+        0.0383
+      ],
+      "bottle_blue_pos": [
+        0.0442,
+        0.1862,
+        0.0334
+      ],
+      "box_green_pos": [
+        0.1051,
+        -0.1214,
+        0.02
+      ],
+      "front_visible_cup_red": false,
+      "front_visible_bottle_blue": true,
+      "front_visible_box_green": true,
+      "init_grip_pos": [
+        -0.2204,
+        0.14,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 99,
+      "sim_time_s": 9.9,
+      "wall_time_s": 1.325
+    },
+    {
+      "seed": 100003,
+      "target": "bottle_blue",
+      "start_pose": "look_L",
+      "target_initial_place": "L",
+      "target_front_visible": false,
+      "target_wrist_visible": true,
+      "cup_red_pos": [
+        -0.0405,
+        -0.0952,
+        0.0393
+      ],
+      "bottle_blue_pos": [
+        -0.3097,
+        0.1731,
+        0.0338
+      ],
+      "box_green_pos": [
+        0.2239,
+        0.1757,
+        0.0191
+      ],
+      "front_visible_cup_red": true,
+      "front_visible_bottle_blue": false,
+      "front_visible_box_green": false,
+      "init_grip_pos": [
+        -0.2834,
+        0.14,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 67,
+      "sim_time_s": 6.7,
+      "wall_time_s": 0.886
+    },
+    {
+      "seed": 100004,
+      "target": "box_green",
+      "start_pose": "look_L",
+      "target_initial_place": "L",
+      "target_front_visible": false,
+      "target_wrist_visible": true,
+      "cup_red_pos": [
+        -0.0391,
+        0.1136,
+        0.0388
+      ],
+      "bottle_blue_pos": [
+        0.085,
+        -0.0926,
+        0.0335
+      ],
+      "box_green_pos": [
+        -0.2557,
+        0.1323,
+        0.0198
+      ],
+      "front_visible_cup_red": true,
+      "front_visible_bottle_blue": true,
+      "front_visible_box_green": false,
+      "init_grip_pos": [
+        -0.2836,
+        0.14,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 70,
+      "sim_time_s": 7.0,
+      "wall_time_s": 0.967
+    },
+    {
+      "seed": 100005,
+      "target": "cup_red",
+      "start_pose": "look_R",
+      "target_initial_place": "R",
+      "target_front_visible": false,
+      "target_wrist_visible": true,
+      "cup_red_pos": [
+        0.2525,
+        0.1384,
+        0.0392
+      ],
+      "bottle_blue_pos": [
+        0.0666,
+        0.1585,
+        0.0337
+      ],
+      "box_green_pos": [
+        0.0638,
+        -0.1329,
+        0.0199
+      ],
+      "front_visible_cup_red": false,
+      "front_visible_bottle_blue": true,
+      "front_visible_box_green": true,
+      "init_grip_pos": [
+        0.2726,
+        0.14,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 65,
+      "sim_time_s": 6.5,
+      "wall_time_s": 0.899
+    },
+    {
+      "seed": 100006,
+      "target": "bottle_blue",
+      "start_pose": "look_R",
+      "target_initial_place": "R",
+      "target_front_visible": false,
+      "target_wrist_visible": true,
+      "cup_red_pos": [
+        -0.2298,
+        0.1435,
+        0.04
+      ],
+      "bottle_blue_pos": [
+        0.2104,
+        0.1826,
+        0.0335
+      ],
+      "box_green_pos": [
+        -0.0663,
+        0.1909,
+        0.0199
+      ],
+      "front_visible_cup_red": false,
+      "front_visible_bottle_blue": false,
+      "front_visible_box_green": true,
+      "init_grip_pos": [
+        0.2573,
+        0.14,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 97,
+      "sim_time_s": 9.7,
+      "wall_time_s": 1.304
+    },
+    {
+      "seed": 100007,
+      "target": "box_green",
+      "start_pose": "look_R",
+      "target_initial_place": "R",
+      "target_front_visible": false,
+      "target_wrist_visible": true,
+      "cup_red_pos": [
+        -0.0477,
+        0.1592,
+        0.0387
+      ],
+      "bottle_blue_pos": [
+        -0.3015,
+        0.0918,
+        0.035
+      ],
+      "box_green_pos": [
+        0.2865,
+        0.1715,
+        0.02
+      ],
+      "front_visible_cup_red": true,
+      "front_visible_bottle_blue": false,
+      "front_visible_box_green": false,
+      "init_grip_pos": [
+        0.2802,
+        0.14,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 67,
+      "sim_time_s": 6.7,
+      "wall_time_s": 1.007
+    },
+    {
+      "seed": 100008,
+      "target": "cup_red",
+      "start_pose": "home",
+      "target_initial_place": "OPEN",
+      "target_front_visible": true,
+      "target_wrist_visible": false,
+      "cup_red_pos": [
+        0.3782,
+        -0.0691,
+        0.04
+      ],
+      "bottle_blue_pos": [
+        -0.1135,
+        -0.1401,
+        0.0333
+      ],
+      "box_green_pos": [
+        0.0539,
+        -0.0955,
+        0.0196
+      ],
+      "front_visible_cup_red": true,
+      "front_visible_bottle_blue": true,
+      "front_visible_box_green": true,
+      "init_grip_pos": [
+        0.0,
+        -0.28,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 101,
+      "sim_time_s": 10.1,
+      "wall_time_s": 1.393
+    },
+    {
+      "seed": 100009,
+      "target": "bottle_blue",
+      "start_pose": "home",
+      "target_initial_place": "OPEN",
+      "target_front_visible": true,
+      "target_wrist_visible": false,
+      "cup_red_pos": [
+        0.31,
+        0.1381,
+        0.0399
+      ],
+      "bottle_blue_pos": [
+        0.0419,
+        0.123,
+        0.035
+      ],
+      "box_green_pos": [
+        -0.3071,
+        0.19,
+        0.02
+      ],
+      "front_visible_cup_red": false,
+      "front_visible_bottle_blue": true,
+      "front_visible_box_green": false,
+      "init_grip_pos": [
+        0.0,
+        -0.28,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 106,
+      "sim_time_s": 10.6,
+      "wall_time_s": 1.347
+    },
+    {
+      "seed": 100010,
+      "target": "box_green",
+      "start_pose": "home",
+      "target_initial_place": "OPEN",
+      "target_front_visible": true,
+      "target_wrist_visible": false,
+      "cup_red_pos": [
+        0.0659,
+        -0.1229,
+        0.04
+      ],
+      "bottle_blue_pos": [
+        -0.3594,
+        -0.0946,
+        0.0332
+      ],
+      "box_green_pos": [
+        0.0163,
+        0.1901,
+        0.0194
+      ],
+      "front_visible_cup_red": true,
+      "front_visible_bottle_blue": true,
+      "front_visible_box_green": true,
+      "init_grip_pos": [
+        0.0,
+        -0.28,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 126,
+      "sim_time_s": 12.6,
+      "wall_time_s": 1.56
+    },
+    {
+      "seed": 100011,
+      "target": "cup_red",
+      "start_pose": "look_L",
+      "target_initial_place": "L",
+      "target_front_visible": false,
+      "target_wrist_visible": true,
+      "cup_red_pos": [
+        -0.2987,
+        0.1,
+        0.0381
+      ],
+      "bottle_blue_pos": [
+        0.1272,
+        -0.0607,
+        0.035
+      ],
+      "box_green_pos": [
+        0.2128,
+        0.1073,
+        0.0192
+      ],
+      "front_visible_cup_red": false,
+      "front_visible_bottle_blue": true,
+      "front_visible_box_green": false,
+      "init_grip_pos": [
+        -0.2779,
+        0.14,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 87,
+      "sim_time_s": 8.7,
+      "wall_time_s": 1.119
+    },
+    {
+      "seed": 100012,
+      "target": "bottle_blue",
+      "start_pose": "look_L",
+      "target_initial_place": "L",
+      "target_front_visible": false,
+      "target_wrist_visible": true,
+      "cup_red_pos": [
+        -0.2448,
+        -0.1224,
+        0.0393
+      ],
+      "bottle_blue_pos": [
+        -0.2162,
+        0.0931,
+        0.0339
+      ],
+      "box_green_pos": [
+        0.1926,
+        0.1718,
+        0.0196
+      ],
+      "front_visible_cup_red": true,
+      "front_visible_bottle_blue": false,
+      "front_visible_box_green": false,
+      "init_grip_pos": [
+        -0.2678,
+        0.14,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 66,
+      "sim_time_s": 6.6,
+      "wall_time_s": 0.817
+    },
+    {
+      "seed": 100013,
+      "target": "box_green",
+      "start_pose": "look_L",
+      "target_initial_place": "L",
+      "target_front_visible": false,
+      "target_wrist_visible": true,
+      "cup_red_pos": [
+        -0.1338,
+        -0.1253,
+        0.0385
+      ],
+      "bottle_blue_pos": [
+        0.2804,
+        0.1069,
+        0.0334
+      ],
+      "box_green_pos": [
+        -0.1785,
+        0.1482,
+        0.019
+      ],
+      "front_visible_cup_red": true,
+      "front_visible_bottle_blue": false,
+      "front_visible_box_green": false,
+      "init_grip_pos": [
+        -0.2202,
+        0.14,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 93,
+      "sim_time_s": 9.3,
+      "wall_time_s": 1.201
+    },
+    {
+      "seed": 100014,
+      "target": "cup_red",
+      "start_pose": "look_R",
+      "target_initial_place": "R",
+      "target_front_visible": false,
+      "target_wrist_visible": true,
+      "cup_red_pos": [
+        0.2293,
+        0.1695,
+        0.0382
+      ],
+      "bottle_blue_pos": [
+        0.3094,
+        0.1753,
+        0.0333
+      ],
+      "box_green_pos": [
+        -0.268,
+        0.0937,
+        0.02
+      ],
+      "front_visible_cup_red": false,
+      "front_visible_bottle_blue": false,
+      "front_visible_box_green": false,
+      "init_grip_pos": [
+        0.2591,
+        0.14,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 67,
+      "sim_time_s": 6.7,
+      "wall_time_s": 0.824
+    },
+    {
+      "seed": 100015,
+      "target": "bottle_blue",
+      "start_pose": "look_R",
+      "target_initial_place": "R",
+      "target_front_visible": false,
+      "target_wrist_visible": true,
+      "cup_red_pos": [
+        -0.1967,
+        -0.1491,
+        0.0393
+      ],
+      "bottle_blue_pos": [
+        0.2178,
+        0.1422,
+        0.035
+      ],
+      "box_green_pos": [
+        -0.3127,
+        0.1585,
+        0.02
+      ],
+      "front_visible_cup_red": true,
+      "front_visible_bottle_blue": false,
+      "front_visible_box_green": false,
+      "init_grip_pos": [
+        0.2739,
+        0.14,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 96,
+      "sim_time_s": 9.6,
+      "wall_time_s": 1.23
+    },
+    {
+      "seed": 100016,
+      "target": "box_green",
+      "start_pose": "look_R",
+      "target_initial_place": "R",
+      "target_front_visible": false,
+      "target_wrist_visible": true,
+      "cup_red_pos": [
+        -0.2943,
+        0.0991,
+        0.0397
+      ],
+      "bottle_blue_pos": [
+        0.0312,
+        0.1196,
+        0.0336
+      ],
+      "box_green_pos": [
+        0.2669,
+        0.1684,
+        0.0191
+      ],
+      "front_visible_cup_red": false,
+      "front_visible_bottle_blue": true,
+      "front_visible_box_green": false,
+      "init_grip_pos": [
+        0.2728,
+        0.14,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 67,
+      "sim_time_s": 6.7,
+      "wall_time_s": 0.794
+    },
+    {
+      "seed": 100017,
+      "target": "cup_red",
+      "start_pose": "home",
+      "target_initial_place": "OPEN",
+      "target_front_visible": true,
+      "target_wrist_visible": false,
+      "cup_red_pos": [
+        0.0611,
+        0.1531,
+        0.0393
+      ],
+      "bottle_blue_pos": [
+        -0.0316,
+        -0.1452,
+        0.0337
+      ],
+      "box_green_pos": [
+        -0.2245,
+        0.1671,
+        0.0194
+      ],
+      "front_visible_cup_red": true,
+      "front_visible_bottle_blue": true,
+      "front_visible_box_green": false,
+      "init_grip_pos": [
+        0.0,
+        -0.28,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 105,
+      "sim_time_s": 10.5,
+      "wall_time_s": 1.19
+    },
+    {
+      "seed": 100018,
+      "target": "bottle_blue",
+      "start_pose": "home",
+      "target_initial_place": "OPEN",
+      "target_front_visible": true,
+      "target_wrist_visible": false,
+      "cup_red_pos": [
+        0.2223,
+        0.1308,
+        0.0384
+      ],
+      "bottle_blue_pos": [
+        -0.2464,
+        -0.132,
+        0.0339
+      ],
+      "box_green_pos": [
+        -0.0547,
+        0.1833,
+        0.02
+      ],
+      "front_visible_cup_red": false,
+      "front_visible_bottle_blue": true,
+      "front_visible_box_green": true,
+      "init_grip_pos": [
+        0.0,
+        -0.28,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 90,
+      "sim_time_s": 9.0,
+      "wall_time_s": 1.193
+    },
+    {
+      "seed": 100019,
+      "target": "box_green",
+      "start_pose": "home",
+      "target_initial_place": "OPEN",
+      "target_front_visible": true,
+      "target_wrist_visible": false,
+      "cup_red_pos": [
+        -0.2046,
+        0.1094,
+        0.04
+      ],
+      "bottle_blue_pos": [
+        -0.3001,
+        0.1359,
+        0.0336
+      ],
+      "box_green_pos": [
+        -0.0563,
+        0.1057,
+        0.0192
+      ],
+      "front_visible_cup_red": false,
+      "front_visible_bottle_blue": false,
+      "front_visible_box_green": true,
+      "init_grip_pos": [
+        0.0,
+        -0.28,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 93,
+      "sim_time_s": 9.3,
+      "wall_time_s": 1.163
+    },
+    {
+      "seed": 100020,
+      "target": "cup_red",
+      "start_pose": "look_L",
+      "target_initial_place": "L",
+      "target_front_visible": false,
+      "target_wrist_visible": true,
+      "cup_red_pos": [
+        -0.3128,
+        0.1677,
+        0.0386
+      ],
+      "bottle_blue_pos": [
+        -0.0204,
+        0.1345,
+        0.035
+      ],
+      "box_green_pos": [
+        -0.2203,
+        -0.1343,
+        0.0195
+      ],
+      "front_visible_cup_red": false,
+      "front_visible_bottle_blue": true,
+      "front_visible_box_green": true,
+      "init_grip_pos": [
+        -0.256,
+        0.14,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 76,
+      "sim_time_s": 7.6,
+      "wall_time_s": 0.924
+    },
+    {
+      "seed": 100021,
+      "target": "bottle_blue",
+      "start_pose": "look_L",
+      "target_initial_place": "L",
+      "target_front_visible": false,
+      "target_wrist_visible": true,
+      "cup_red_pos": [
+        0.1179,
+        -0.0645,
+        0.0383
+      ],
+      "bottle_blue_pos": [
+        -0.2167,
+        0.1721,
+        0.035
+      ],
+      "box_green_pos": [
+        0.0572,
+        0.0791,
+        0.0197
+      ],
+      "front_visible_cup_red": true,
+      "front_visible_bottle_blue": false,
+      "front_visible_box_green": true,
+      "init_grip_pos": [
+        -0.2335,
+        0.14,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 89,
+      "sim_time_s": 8.9,
+      "wall_time_s": 1.007
+    },
+    {
+      "seed": 100022,
+      "target": "box_green",
+      "start_pose": "look_L",
+      "target_initial_place": "L",
+      "target_front_visible": false,
+      "target_wrist_visible": true,
+      "cup_red_pos": [
+        0.0555,
+        0.1383,
+        0.04
+      ],
+      "bottle_blue_pos": [
+        -0.3483,
+        -0.0738,
+        0.0347
+      ],
+      "box_green_pos": [
+        -0.2475,
+        0.163,
+        0.02
+      ],
+      "front_visible_cup_red": true,
+      "front_visible_bottle_blue": true,
+      "front_visible_box_green": false,
+      "init_grip_pos": [
+        -0.2607,
+        0.14,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 74,
+      "sim_time_s": 7.4,
+      "wall_time_s": 0.85
+    },
+    {
+      "seed": 100023,
+      "target": "cup_red",
+      "start_pose": "look_R",
+      "target_initial_place": "R",
+      "target_front_visible": false,
+      "target_wrist_visible": true,
+      "cup_red_pos": [
+        0.1922,
+        0.1649,
+        0.0386
+      ],
+      "bottle_blue_pos": [
+        0.3002,
+        0.131,
+        0.035
+      ],
+      "box_green_pos": [
+        -0.0403,
+        0.0872,
+        0.02
+      ],
+      "front_visible_cup_red": false,
+      "front_visible_bottle_blue": false,
+      "front_visible_box_green": true,
+      "init_grip_pos": [
+        0.249,
+        0.14,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 83,
+      "sim_time_s": 8.3,
+      "wall_time_s": 0.978
+    },
+    {
+      "seed": 100024,
+      "target": "bottle_blue",
+      "start_pose": "look_R",
+      "target_initial_place": "R",
+      "target_front_visible": false,
+      "target_wrist_visible": true,
+      "cup_red_pos": [
+        0.0152,
+        -0.1327,
+        0.04
+      ],
+      "bottle_blue_pos": [
+        0.2652,
+        0.1801,
+        0.035
+      ],
+      "box_green_pos": [
+        -0.2164,
+        0.0921,
+        0.02
+      ],
+      "front_visible_cup_red": true,
+      "front_visible_bottle_blue": false,
+      "front_visible_box_green": false,
+      "init_grip_pos": [
+        0.2623,
+        0.14,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 71,
+      "sim_time_s": 7.1,
+      "wall_time_s": 0.849
+    },
+    {
+      "seed": 100025,
+      "target": "box_green",
+      "start_pose": "look_R",
+      "target_initial_place": "R",
+      "target_front_visible": false,
+      "target_wrist_visible": true,
+      "cup_red_pos": [
+        -0.2942,
+        0.125,
+        0.0385
+      ],
+      "bottle_blue_pos": [
+        -0.1358,
+        -0.102,
+        0.0339
+      ],
+      "box_green_pos": [
+        0.248,
+        0.107,
+        0.0197
+      ],
+      "front_visible_cup_red": false,
+      "front_visible_bottle_blue": true,
+      "front_visible_box_green": false,
+      "init_grip_pos": [
+        0.2223,
+        0.14,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 64,
+      "sim_time_s": 6.4,
+      "wall_time_s": 0.728
+    },
+    {
+      "seed": 100026,
+      "target": "cup_red",
+      "start_pose": "home",
+      "target_initial_place": "OPEN",
+      "target_front_visible": true,
+      "target_wrist_visible": false,
+      "cup_red_pos": [
+        -0.2446,
+        -0.1098,
+        0.0388
+      ],
+      "bottle_blue_pos": [
+        0.2122,
+        0.0928,
+        0.0342
+      ],
+      "box_green_pos": [
+        -0.16,
+        -0.0977,
+        0.0196
+      ],
+      "front_visible_cup_red": true,
+      "front_visible_bottle_blue": false,
+      "front_visible_box_green": true,
+      "init_grip_pos": [
+        0.0,
+        -0.28,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 78,
+      "sim_time_s": 7.8,
+      "wall_time_s": 0.901
+    },
+    {
+      "seed": 100027,
+      "target": "bottle_blue",
+      "start_pose": "home",
+      "target_initial_place": "OPEN",
+      "target_front_visible": true,
+      "target_wrist_visible": false,
+      "cup_red_pos": [
+        0.0359,
+        0.1083,
+        0.0384
+      ],
+      "bottle_blue_pos": [
+        -0.1526,
+        -0.0804,
+        0.0336
+      ],
+      "box_green_pos": [
+        -0.3111,
+        -0.1194,
+        0.0195
+      ],
+      "front_visible_cup_red": true,
+      "front_visible_bottle_blue": true,
+      "front_visible_box_green": true,
+      "init_grip_pos": [
+        0.0,
+        -0.28,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 74,
+      "sim_time_s": 7.4,
+      "wall_time_s": 0.818
+    },
+    {
+      "seed": 100028,
+      "target": "box_green",
+      "start_pose": "home",
+      "target_initial_place": "OPEN",
+      "target_front_visible": true,
+      "target_wrist_visible": false,
+      "cup_red_pos": [
+        0.2801,
+        0.1637,
+        0.0384
+      ],
+      "bottle_blue_pos": [
+        0.1997,
+        0.167,
+        0.035
+      ],
+      "box_green_pos": [
+        0.0912,
+        -0.121,
+        0.02
+      ],
+      "front_visible_cup_red": false,
+      "front_visible_bottle_blue": false,
+      "front_visible_box_green": true,
+      "init_grip_pos": [
+        0.0,
+        -0.28,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 80,
+      "sim_time_s": 8.0,
+      "wall_time_s": 0.892
+    },
+    {
+      "seed": 100029,
+      "target": "cup_red",
+      "start_pose": "look_L",
+      "target_initial_place": "L",
+      "target_front_visible": false,
+      "target_wrist_visible": true,
+      "cup_red_pos": [
+        -0.3317,
+        0.1056,
+        0.0396
+      ],
+      "bottle_blue_pos": [
+        -0.1739,
+        -0.067,
+        0.0335
+      ],
+      "box_green_pos": [
+        -0.0437,
+        0.1475,
+        0.019
+      ],
+      "front_visible_cup_red": false,
+      "front_visible_bottle_blue": true,
+      "front_visible_box_green": true,
+      "init_grip_pos": [
+        -0.2794,
+        0.14,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 71,
+      "sim_time_s": 7.1,
+      "wall_time_s": 0.822
+    },
+    {
+      "seed": 100030,
+      "target": "bottle_blue",
+      "start_pose": "look_L",
+      "target_initial_place": "L",
+      "target_front_visible": false,
+      "target_wrist_visible": true,
+      "cup_red_pos": [
+        -0.2328,
+        0.1446,
+        0.0389
+      ],
+      "bottle_blue_pos": [
+        -0.3163,
+        0.1748,
+        0.0349
+      ],
+      "box_green_pos": [
+        0.0315,
+        0.1831,
+        0.02
+      ],
+      "front_visible_cup_red": false,
+      "front_visible_bottle_blue": false,
+      "front_visible_box_green": true,
+      "init_grip_pos": [
+        -0.2802,
+        0.14,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 77,
+      "sim_time_s": 7.7,
+      "wall_time_s": 1.051
+    },
+    {
+      "seed": 100031,
+      "target": "box_green",
+      "start_pose": "look_L",
+      "target_initial_place": "L",
+      "target_front_visible": false,
+      "target_wrist_visible": true,
+      "cup_red_pos": [
+        0.0761,
+        -0.0955,
+        0.0385
+      ],
+      "bottle_blue_pos": [
+        0.2472,
+        0.1294,
+        0.035
+      ],
+      "box_green_pos": [
+        -0.2065,
+        0.1214,
+        0.02
+      ],
+      "front_visible_cup_red": true,
+      "front_visible_bottle_blue": false,
+      "front_visible_box_green": false,
+      "init_grip_pos": [
+        -0.2305,
+        0.14,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 93,
+      "sim_time_s": 9.3,
+      "wall_time_s": 1.253
+    },
+    {
+      "seed": 100032,
+      "target": "cup_red",
+      "start_pose": "look_R",
+      "target_initial_place": "R",
+      "target_front_visible": false,
+      "target_wrist_visible": true,
+      "cup_red_pos": [
+        0.3144,
+        0.1859,
+        0.0398
+      ],
+      "bottle_blue_pos": [
+        0.2517,
+        0.1034,
+        0.035
+      ],
+      "box_green_pos": [
+        -0.2662,
+        0.1554,
+        0.0196
+      ],
+      "front_visible_cup_red": false,
+      "front_visible_bottle_blue": false,
+      "front_visible_box_green": false,
+      "init_grip_pos": [
+        0.2609,
+        0.14,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 79,
+      "sim_time_s": 7.9,
+      "wall_time_s": 0.997
+    },
+    {
+      "seed": 100033,
+      "target": "bottle_blue",
+      "start_pose": "look_R",
+      "target_initial_place": "R",
+      "target_front_visible": false,
+      "target_wrist_visible": true,
+      "cup_red_pos": [
+        -0.0197,
+        0.1926,
+        0.04
+      ],
+      "bottle_blue_pos": [
+        0.2464,
+        0.0959,
+        0.035
+      ],
+      "box_green_pos": [
+        -0.131,
+        -0.1091,
+        0.019
+      ],
+      "front_visible_cup_red": true,
+      "front_visible_bottle_blue": false,
+      "front_visible_box_green": true,
+      "init_grip_pos": [
+        0.2513,
+        0.14,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 68,
+      "sim_time_s": 6.8,
+      "wall_time_s": 0.84
+    },
+    {
+      "seed": 100034,
+      "target": "box_green",
+      "start_pose": "look_R",
+      "target_initial_place": "R",
+      "target_front_visible": false,
+      "target_wrist_visible": true,
+      "cup_red_pos": [
+        -0.1825,
+        0.1793,
+        0.0393
+      ],
+      "bottle_blue_pos": [
+        0.2175,
+        0.1583,
+        0.035
+      ],
+      "box_green_pos": [
+        0.3085,
+        0.0926,
+        0.0189
+      ],
+      "front_visible_cup_red": false,
+      "front_visible_bottle_blue": false,
+      "front_visible_box_green": false,
+      "init_grip_pos": [
+        0.2542,
+        0.14,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 79,
+      "sim_time_s": 7.9,
+      "wall_time_s": 0.937
+    },
+    {
+      "seed": 100035,
+      "target": "cup_red",
+      "start_pose": "home",
+      "target_initial_place": "OPEN",
+      "target_front_visible": true,
+      "target_wrist_visible": false,
+      "cup_red_pos": [
+        0.3567,
+        -0.1297,
+        0.038
+      ],
+      "bottle_blue_pos": [
+        0.029,
+        -0.116,
+        0.035
+      ],
+      "box_green_pos": [
+        -0.1545,
+        -0.0755,
+        0.0191
+      ],
+      "front_visible_cup_red": true,
+      "front_visible_bottle_blue": true,
+      "front_visible_box_green": true,
+      "init_grip_pos": [
+        0.0,
+        -0.28,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 87,
+      "sim_time_s": 8.7,
+      "wall_time_s": 1.045
+    },
+    {
+      "seed": 100036,
+      "target": "bottle_blue",
+      "start_pose": "home",
+      "target_initial_place": "OPEN",
+      "target_front_visible": true,
+      "target_wrist_visible": false,
+      "cup_red_pos": [
+        -0.1285,
+        -0.0721,
+        0.0396
+      ],
+      "bottle_blue_pos": [
+        -0.02,
+        0.1777,
+        0.0338
+      ],
+      "box_green_pos": [
+        0.3835,
+        -0.067,
+        0.0199
+      ],
+      "front_visible_cup_red": true,
+      "front_visible_bottle_blue": true,
+      "front_visible_box_green": true,
+      "init_grip_pos": [
+        0.0,
+        -0.28,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 95,
+      "sim_time_s": 9.5,
+      "wall_time_s": 1.164
+    },
+    {
+      "seed": 100037,
+      "target": "box_green",
+      "start_pose": "home",
+      "target_initial_place": "OPEN",
+      "target_front_visible": true,
+      "target_wrist_visible": false,
+      "cup_red_pos": [
+        -0.2032,
+        0.116,
+        0.038
+      ],
+      "bottle_blue_pos": [
+        0.279,
+        0.1651,
+        0.0338
+      ],
+      "box_green_pos": [
+        -0.3444,
+        -0.08,
+        0.02
+      ],
+      "front_visible_cup_red": false,
+      "front_visible_bottle_blue": false,
+      "front_visible_box_green": true,
+      "init_grip_pos": [
+        0.0,
+        -0.28,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 112,
+      "sim_time_s": 11.2,
+      "wall_time_s": 1.387
+    },
+    {
+      "seed": 100038,
+      "target": "cup_red",
+      "start_pose": "look_L",
+      "target_initial_place": "L",
+      "target_front_visible": false,
+      "target_wrist_visible": true,
+      "cup_red_pos": [
+        -0.2427,
+        0.1459,
+        0.04
+      ],
+      "bottle_blue_pos": [
+        0.2974,
+        0.1559,
+        0.035
+      ],
+      "box_green_pos": [
+        -0.3174,
+        0.0908,
+        0.02
+      ],
+      "front_visible_cup_red": false,
+      "front_visible_bottle_blue": false,
+      "front_visible_box_green": false,
+      "init_grip_pos": [
+        -0.2812,
+        0.14,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 98,
+      "sim_time_s": 9.8,
+      "wall_time_s": 1.21
+    },
+    {
+      "seed": 100039,
+      "target": "bottle_blue",
+      "start_pose": "look_L",
+      "target_initial_place": "L",
+      "target_front_visible": false,
+      "target_wrist_visible": true,
+      "cup_red_pos": [
+        0.3857,
+        -0.104,
+        0.04
+      ],
+      "bottle_blue_pos": [
+        -0.2418,
+        0.1271,
+        0.034
+      ],
+      "box_green_pos": [
+        0.1995,
+        -0.0618,
+        0.0196
+      ],
+      "front_visible_cup_red": true,
+      "front_visible_bottle_blue": false,
+      "front_visible_box_green": true,
+      "init_grip_pos": [
+        -0.2753,
+        0.14,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 85,
+      "sim_time_s": 8.5,
+      "wall_time_s": 1.081
+    },
+    {
+      "seed": 100040,
+      "target": "box_green",
+      "start_pose": "look_L",
+      "target_initial_place": "L",
+      "target_front_visible": false,
+      "target_wrist_visible": true,
+      "cup_red_pos": [
+        0.3361,
+        -0.1287,
+        0.04
+      ],
+      "bottle_blue_pos": [
+        -0.3991,
+        -0.0999,
+        0.035
+      ],
+      "box_green_pos": [
+        -0.2371,
+        0.1519,
+        0.0199
+      ],
+      "front_visible_cup_red": true,
+      "front_visible_bottle_blue": true,
+      "front_visible_box_green": false,
+      "init_grip_pos": [
+        -0.2782,
+        0.14,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 84,
+      "sim_time_s": 8.4,
+      "wall_time_s": 1.039
+    },
+    {
+      "seed": 100041,
+      "target": "cup_red",
+      "start_pose": "look_R",
+      "target_initial_place": "R",
+      "target_front_visible": false,
+      "target_wrist_visible": true,
+      "cup_red_pos": [
+        0.2021,
+        0.1653,
+        0.04
+      ],
+      "bottle_blue_pos": [
+        -0.0562,
+        0.0889,
+        0.0334
+      ],
+      "box_green_pos": [
+        0.0614,
+        0.1722,
+        0.0195
+      ],
+      "front_visible_cup_red": false,
+      "front_visible_bottle_blue": true,
+      "front_visible_box_green": true,
+      "init_grip_pos": [
+        0.2307,
+        0.14,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 67,
+      "sim_time_s": 6.7,
+      "wall_time_s": 0.836
+    },
+    {
+      "seed": 100042,
+      "target": "bottle_blue",
+      "start_pose": "look_R",
+      "target_initial_place": "R",
+      "target_front_visible": false,
+      "target_wrist_visible": true,
+      "cup_red_pos": [
+        0.3158,
+        -0.1201,
+        0.0399
+      ],
+      "bottle_blue_pos": [
+        0.2166,
+        0.1562,
+        0.0348
+      ],
+      "box_green_pos": [
+        -0.2057,
+        -0.1421,
+        0.02
+      ],
+      "front_visible_cup_red": true,
+      "front_visible_bottle_blue": false,
+      "front_visible_box_green": true,
+      "init_grip_pos": [
+        0.2421,
+        0.14,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 74,
+      "sim_time_s": 7.4,
+      "wall_time_s": 0.907
+    },
+    {
+      "seed": 100043,
+      "target": "box_green",
+      "start_pose": "look_R",
+      "target_initial_place": "R",
+      "target_front_visible": false,
+      "target_wrist_visible": true,
+      "cup_red_pos": [
+        -0.1902,
+        0.1358,
+        0.0388
+      ],
+      "bottle_blue_pos": [
+        0.2811,
+        0.1175,
+        0.0349
+      ],
+      "box_green_pos": [
+        0.1961,
+        0.1176,
+        0.02
+      ],
+      "front_visible_cup_red": false,
+      "front_visible_bottle_blue": false,
+      "front_visible_box_green": false,
+      "init_grip_pos": [
+        0.2312,
+        0.14,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 66,
+      "sim_time_s": 6.6,
+      "wall_time_s": 0.819
+    },
+    {
+      "seed": 100044,
+      "target": "cup_red",
+      "start_pose": "home",
+      "target_initial_place": "OPEN",
+      "target_front_visible": true,
+      "target_wrist_visible": false,
+      "cup_red_pos": [
+        0.0268,
+        0.0961,
+        0.04
+      ],
+      "bottle_blue_pos": [
+        0.2746,
+        -0.1236,
+        0.0349
+      ],
+      "box_green_pos": [
+        -0.3704,
+        -0.0808,
+        0.02
+      ],
+      "front_visible_cup_red": true,
+      "front_visible_bottle_blue": true,
+      "front_visible_box_green": true,
+      "init_grip_pos": [
+        0.0,
+        -0.28,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 90,
+      "sim_time_s": 9.0,
+      "wall_time_s": 1.048
+    },
+    {
+      "seed": 100045,
+      "target": "bottle_blue",
+      "start_pose": "home",
+      "target_initial_place": "OPEN",
+      "target_front_visible": true,
+      "target_wrist_visible": false,
+      "cup_red_pos": [
+        0.2733,
+        0.177,
+        0.04
+      ],
+      "bottle_blue_pos": [
+        0.3042,
+        -0.0876,
+        0.034
+      ],
+      "box_green_pos": [
+        -0.1911,
+        0.1529,
+        0.0194
+      ],
+      "front_visible_cup_red": false,
+      "front_visible_bottle_blue": true,
+      "front_visible_box_green": false,
+      "init_grip_pos": [
+        0.0,
+        -0.28,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 77,
+      "sim_time_s": 7.7,
+      "wall_time_s": 0.936
+    },
+    {
+      "seed": 100046,
+      "target": "box_green",
+      "start_pose": "home",
+      "target_initial_place": "OPEN",
+      "target_front_visible": true,
+      "target_wrist_visible": false,
+      "cup_red_pos": [
+        0.2937,
+        0.1852,
+        0.04
+      ],
+      "bottle_blue_pos": [
+        -0.2029,
+        0.1648,
+        0.0349
+      ],
+      "box_green_pos": [
+        0.0491,
+        0.0616,
+        0.0199
+      ],
+      "front_visible_cup_red": false,
+      "front_visible_bottle_blue": false,
+      "front_visible_box_green": true,
+      "init_grip_pos": [
+        0.0,
+        -0.28,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 90,
+      "sim_time_s": 9.0,
+      "wall_time_s": 1.039
+    },
+    {
+      "seed": 100047,
+      "target": "cup_red",
+      "start_pose": "look_L",
+      "target_initial_place": "L",
+      "target_front_visible": false,
+      "target_wrist_visible": true,
+      "cup_red_pos": [
+        -0.3201,
+        0.109,
+        0.0384
+      ],
+      "bottle_blue_pos": [
+        0.2232,
+        0.1221,
+        0.0343
+      ],
+      "box_green_pos": [
+        -0.223,
+        0.173,
+        0.02
+      ],
+      "front_visible_cup_red": false,
+      "front_visible_bottle_blue": false,
+      "front_visible_box_green": false,
+      "init_grip_pos": [
+        -0.2798,
+        0.14,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 82,
+      "sim_time_s": 8.2,
+      "wall_time_s": 0.933
+    },
+    {
+      "seed": 100048,
+      "target": "bottle_blue",
+      "start_pose": "look_L",
+      "target_initial_place": "L",
+      "target_front_visible": false,
+      "target_wrist_visible": true,
+      "cup_red_pos": [
+        -0.0066,
+        -0.1327,
+        0.0397
+      ],
+      "bottle_blue_pos": [
+        -0.2926,
+        0.1318,
+        0.0346
+      ],
+      "box_green_pos": [
+        0.3729,
+        -0.0614,
+        0.0197
+      ],
+      "front_visible_cup_red": true,
+      "front_visible_bottle_blue": false,
+      "front_visible_box_green": true,
+      "init_grip_pos": [
+        -0.2741,
+        0.14,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 84,
+      "sim_time_s": 8.4,
+      "wall_time_s": 1.017
+    },
+    {
+      "seed": 100049,
+      "target": "box_green",
+      "start_pose": "look_L",
+      "target_initial_place": "L",
+      "target_front_visible": false,
+      "target_wrist_visible": true,
+      "cup_red_pos": [
+        -0.2057,
+        0.097,
+        0.04
+      ],
+      "bottle_blue_pos": [
+        0.2669,
+        0.1773,
+        0.0339
+      ],
+      "box_green_pos": [
+        -0.2904,
+        0.1528,
+        0.02
+      ],
+      "front_visible_cup_red": false,
+      "front_visible_bottle_blue": false,
+      "front_visible_box_green": false,
+      "init_grip_pos": [
+        -0.2308,
+        0.14,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 78,
+      "sim_time_s": 7.8,
+      "wall_time_s": 0.941
+    },
+    {
+      "seed": 100050,
+      "target": "cup_red",
+      "start_pose": "look_R",
+      "target_initial_place": "R",
+      "target_front_visible": false,
+      "target_wrist_visible": true,
+      "cup_red_pos": [
+        0.2715,
+        0.1869,
+        0.04
+      ],
+      "bottle_blue_pos": [
+        -0.3485,
+        -0.1451,
+        0.035
+      ],
+      "box_green_pos": [
+        -0.0264,
+        0.0905,
+        0.0189
+      ],
+      "front_visible_cup_red": false,
+      "front_visible_bottle_blue": true,
+      "front_visible_box_green": true,
+      "init_grip_pos": [
+        0.2652,
+        0.14,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 95,
+      "sim_time_s": 9.5,
+      "wall_time_s": 1.187
+    },
+    {
+      "seed": 100051,
+      "target": "bottle_blue",
+      "start_pose": "look_R",
+      "target_initial_place": "R",
+      "target_front_visible": false,
+      "target_wrist_visible": true,
+      "cup_red_pos": [
+        -0.2728,
+        0.1209,
+        0.039
+      ],
+      "bottle_blue_pos": [
+        0.3117,
+        0.1397,
+        0.0345
+      ],
+      "box_green_pos": [
+        -0.0371,
+        0.1009,
+        0.02
+      ],
+      "front_visible_cup_red": false,
+      "front_visible_bottle_blue": false,
+      "front_visible_box_green": true,
+      "init_grip_pos": [
+        0.2733,
+        0.14,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 67,
+      "sim_time_s": 6.7,
+      "wall_time_s": 0.851
+    },
+    {
+      "seed": 100052,
+      "target": "box_green",
+      "start_pose": "look_R",
+      "target_initial_place": "R",
+      "target_front_visible": false,
+      "target_wrist_visible": true,
+      "cup_red_pos": [
+        -0.2678,
+        0.1282,
+        0.0399
+      ],
+      "bottle_blue_pos": [
+        0.1019,
+        -0.1135,
+        0.0334
+      ],
+      "box_green_pos": [
+        0.2755,
+        0.1099,
+        0.02
+      ],
+      "front_visible_cup_red": false,
+      "front_visible_bottle_blue": true,
+      "front_visible_box_green": false,
+      "init_grip_pos": [
+        0.2616,
+        0.14,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 83,
+      "sim_time_s": 8.3,
+      "wall_time_s": 1.052
+    },
+    {
+      "seed": 100053,
+      "target": "cup_red",
+      "start_pose": "home",
+      "target_initial_place": "OPEN",
+      "target_front_visible": true,
+      "target_wrist_visible": false,
+      "cup_red_pos": [
+        0.0032,
+        0.181,
+        0.04
+      ],
+      "bottle_blue_pos": [
+        -0.1069,
+        -0.0899,
+        0.035
+      ],
+      "box_green_pos": [
+        -0.3086,
+        0.1099,
+        0.0194
+      ],
+      "front_visible_cup_red": true,
+      "front_visible_bottle_blue": true,
+      "front_visible_box_green": false,
+      "init_grip_pos": [
+        0.0,
+        -0.28,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 92,
+      "sim_time_s": 9.2,
+      "wall_time_s": 1.147
+    },
+    {
+      "seed": 100054,
+      "target": "bottle_blue",
+      "start_pose": "home",
+      "target_initial_place": "OPEN",
+      "target_front_visible": true,
+      "target_wrist_visible": false,
+      "cup_red_pos": [
+        0.3102,
+        0.1653,
+        0.0381
+      ],
+      "bottle_blue_pos": [
+        -0.2136,
+        -0.0723,
+        0.035
+      ],
+      "box_green_pos": [
+        -0.2086,
+        0.1168,
+        0.0196
+      ],
+      "front_visible_cup_red": false,
+      "front_visible_bottle_blue": true,
+      "front_visible_box_green": false,
+      "init_grip_pos": [
+        0.0,
+        -0.28,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 96,
+      "sim_time_s": 9.6,
+      "wall_time_s": 1.188
+    },
+    {
+      "seed": 100055,
+      "target": "box_green",
+      "start_pose": "home",
+      "target_initial_place": "OPEN",
+      "target_front_visible": true,
+      "target_wrist_visible": true,
+      "cup_red_pos": [
+        0.1388,
+        -0.1356,
+        0.0399
+      ],
+      "bottle_blue_pos": [
+        -0.246,
+        0.0942,
+        0.035
+      ],
+      "box_green_pos": [
+        -0.0773,
+        -0.1448,
+        0.0199
+      ],
+      "front_visible_cup_red": true,
+      "front_visible_bottle_blue": false,
+      "front_visible_box_green": true,
+      "init_grip_pos": [
+        0.0,
+        -0.28,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 70,
+      "sim_time_s": 7.0,
+      "wall_time_s": 0.81
+    },
+    {
+      "seed": 100056,
+      "target": "cup_red",
+      "start_pose": "look_L",
+      "target_initial_place": "L",
+      "target_front_visible": false,
+      "target_wrist_visible": true,
+      "cup_red_pos": [
+        -0.2293,
+        0.114,
+        0.0397
+      ],
+      "bottle_blue_pos": [
+        -0.0358,
+        0.1151,
+        0.0349
+      ],
+      "box_green_pos": [
+        0.253,
+        -0.1445,
+        0.0199
+      ],
+      "front_visible_cup_red": false,
+      "front_visible_bottle_blue": true,
+      "front_visible_box_green": true,
+      "init_grip_pos": [
+        -0.2726,
+        0.14,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 77,
+      "sim_time_s": 7.7,
+      "wall_time_s": 0.931
+    },
+    {
+      "seed": 100057,
+      "target": "bottle_blue",
+      "start_pose": "look_L",
+      "target_initial_place": "L",
+      "target_front_visible": false,
+      "target_wrist_visible": true,
+      "cup_red_pos": [
+        0.037,
+        0.1457,
+        0.04
+      ],
+      "bottle_blue_pos": [
+        -0.2549,
+        0.1488,
+        0.0341
+      ],
+      "box_green_pos": [
+        -0.0337,
+        -0.1283,
+        0.0199
+      ],
+      "front_visible_cup_red": true,
+      "front_visible_bottle_blue": false,
+      "front_visible_box_green": true,
+      "init_grip_pos": [
+        -0.2275,
+        0.14,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 75,
+      "sim_time_s": 7.5,
+      "wall_time_s": 0.944
+    },
+    {
+      "seed": 100058,
+      "target": "box_green",
+      "start_pose": "look_L",
+      "target_initial_place": "L",
+      "target_front_visible": false,
+      "target_wrist_visible": true,
+      "cup_red_pos": [
+        -0.0891,
+        -0.1393,
+        0.04
+      ],
+      "bottle_blue_pos": [
+        -0.3744,
+        -0.0779,
+        0.035
+      ],
+      "box_green_pos": [
+        -0.2051,
+        0.1143,
+        0.0199
+      ],
+      "front_visible_cup_red": true,
+      "front_visible_bottle_blue": true,
+      "front_visible_box_green": false,
+      "init_grip_pos": [
+        -0.2306,
+        0.14,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 79,
+      "sim_time_s": 7.9,
+      "wall_time_s": 0.916
+    },
+    {
+      "seed": 100059,
+      "target": "cup_red",
+      "start_pose": "look_R",
+      "target_initial_place": "R",
+      "target_front_visible": false,
+      "target_wrist_visible": true,
+      "cup_red_pos": [
+        0.2916,
+        0.1322,
+        0.038
+      ],
+      "bottle_blue_pos": [
+        -0.0601,
+        0.1323,
+        0.0347
+      ],
+      "box_green_pos": [
+        -0.1915,
+        0.1815,
+        0.0191
+      ],
+      "front_visible_cup_red": false,
+      "front_visible_bottle_blue": true,
+      "front_visible_box_green": false,
+      "init_grip_pos": [
+        0.2747,
+        0.14,
+        0.2998
+      ],
+      "success": 1,
+      "steps": 77,
+      "sim_time_s": 7.7,
+      "wall_time_s": 0.924
+    }
+  ]
+}
