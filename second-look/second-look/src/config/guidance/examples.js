@@ -1,0 +1,82 @@
+/**
+ * Second Look - Preloaded Recovery Playground Scenarios
+ * Grounded in the actual simulator scenarios: 'normal', 'moved', 'missing', 'slip'
+ */
+
+export const PRELOADED_EXAMPLES = [
+  {
+    id: 'example-normal',
+    scenario: 'normal',
+    obj: 'cup',
+    title: 'Nominal Retrieval (No Disturbance)',
+    badge: 'Baseline Flow',
+    badgeCol: 'var(--ok)',
+    desc: 'The target cup remains undisturbed on Table A exactly where the warehouse inventory system recorded it.',
+    whatToObserve: [
+      'The robot moves directly to Table A (Trust Memory path).',
+      'The overhead camera confirms the object is present, boosting confidence from 92% to 97%.',
+      'The gripper executes a clean grasp and finishes without requiring recovery.',
+    ],
+    expectedDecision: 'Trust Memory',
+    beforeState: 'Object on Table A (known position)',
+    afterState: 'Retrieved cleanly in ~3.6s with 0 recovery steps',
+    takeaway: 'Baseline behavior operates with maximum speed when warehouse state matches memory.',
+  },
+  {
+    id: 'example-moved',
+    scenario: 'moved',
+    obj: 'bottle',
+    title: 'Uncertain Location (Object Shifted)',
+    badge: 'Spatial Recovery',
+    badgeCol: 'var(--mem)',
+    desc: 'A human coworker or conveyor vibration shifted the bottle to Table B or C without updating the central database.',
+    whatToObserve: [
+      'The robot first checks Table A, expecting the bottle.',
+      'Upon scanning Table A and finding it empty, confidence in Table A drops from 92% to 2%.',
+      'Probability redistributes to Table B and Shelf C. The robot autonomous searches the next highest-likelihood station.',
+      'Once spotted, confidence surges and the robot completes the pick.',
+    ],
+    expectedDecision: 'Search Elsewhere',
+    beforeState: 'Stored on Table A, actually resting on Table B/C',
+    afterState: 'Successfully localized & retrieved in ~6-8s with 1 recovery step',
+    takeaway: 'Fixed-path baseline fails completely here. Second Look recovers seamlessly.',
+  },
+  {
+    id: 'example-missing',
+    scenario: 'missing',
+    obj: 'box',
+    title: 'Missing Item (Warehouse Outage)',
+    badge: 'Human Escalation',
+    badgeCol: 'var(--bad)',
+    desc: 'The SKU was accidentally removed from the workstation entirely (misplaced in another zone).',
+    whatToObserve: [
+      'The robot checks Table A (not found).',
+      'It searches Table B and Shelf C systematically.',
+      'Confidence in all stations drops below 5%, pushing "Out of view" uncertainty above 80%.',
+      'Instead of looping indefinitely or crashing, the system triggers the "Request Help" path with full context.',
+    ],
+    expectedDecision: 'Request Help',
+    beforeState: 'Item absent from all workstation tables',
+    afterState: 'Escalated to human supervisor with audit trail of scanned locations',
+    takeaway: 'Prevents robotic downtime and hallucinated grasps in unrecoverable states.',
+  },
+  {
+    id: 'example-slip',
+    scenario: 'slip',
+    obj: 'cup',
+    title: 'Mechanical Slip (Grasp Failure)',
+    badge: 'Physical Recovery',
+    badgeCol: 'var(--acc)',
+    desc: 'The item is at the correct table, but surface friction or low grasp pressure causes the object to slip from the end-effector.',
+    whatToObserve: [
+      'The robot locates the cup on Table A and initiates grasp.',
+      'The tactile/visual feedback detects a slip during lift.',
+      'The robot detects the cup is still in view and triggers the "Retry Grasp" path.',
+      'A second secure grasp is executed and retrieval completes.',
+    ],
+    expectedDecision: 'Retry Grasp',
+    beforeState: 'Item on Table A; gripper slip event simulated on first lift',
+    afterState: 'Recovered via autonomous second-attempt grasp in ~5.2s',
+    takeaway: 'Distinguishes between item absence and mechanical slip for targeted retry.',
+  },
+]
